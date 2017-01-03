@@ -16,14 +16,14 @@ BUTTON_B = 64
 BUTTON_A = 128
 
 BUTTON_NAMES = {
-    BUTTON_RIGHT: "RIGHT",
-    BUTTON_DOWN: "DOWN",
-    BUTTON_LEFT: "LEFT",
-    BUTTON_UP: "UP",
-    BUTTON_SELECT: "SELECT",
-    BUTTON_START: "START",
-    BUTTON_B: "B",
-    BUTTON_A: "A",
+    BUTTON_RIGHT: "right",
+    BUTTON_DOWN: "down",
+    BUTTON_LEFT: "left",
+    BUTTON_UP: "up",
+    BUTTON_SELECT: "select",
+    BUTTON_START: "start",
+    BUTTON_B: "b",
+    BUTTON_A: "a",
 }
 
 STATUS_UPDATE = 1
