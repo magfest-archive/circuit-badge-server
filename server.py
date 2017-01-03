@@ -62,7 +62,7 @@ class BadgeState:
 
 
 def format_mac(mac):
-    return ':'.join(('%02x' % d for d in mac))
+    return ':'.join(('%02X' % d for d in mac))
 
 
 class Component(ApplicationSession):
