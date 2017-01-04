@@ -9,7 +9,7 @@ import requests
 
 
 FIND_GROUP = "mag15gaylord"
-TRACK_URL = "http://find.magevent.net/track"
+TRACK_URL = "http://badges.magevent.net:8003/track"
 
 
 class Component(ApplicationSession):
