@@ -122,7 +122,7 @@ class Component(ApplicationSession):
 
         self.socket = sock
         while True:
-            data, addr = sock.recvfrom(1024)
+            data, (ip, port) = sock.recvfrom(1024)
             if addr[0] in socket.gethostbyname_ex(socket.gethostname())[2]:
                 continue
             #print("Received udp message from {0}: {1}".format(addr, data))
@@ -134,7 +134,7 @@ class Component(ApplicationSession):
             if msg_type == STATUS_UPDATE:
                 #print("Got status update: ".format(packet))
                 next_state = BadgeState.from_bytes(packet)
-                next_state.ip = addr
+                next_state.ip = ip
 
                 if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
                     self.badge_states[badge_id] = next_state
