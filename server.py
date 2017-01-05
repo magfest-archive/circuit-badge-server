@@ -36,7 +36,7 @@ LED_RAINBOW_MODES = 7
 CONFIGURE = 8
 DEEP_SLEEP = 9
 
-SCAN_INTERVAL = 15
+SCAN_INTERVAL = 60
 
 import traceback
 
@@ -118,7 +118,7 @@ class Component(ApplicationSession):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
 
-        next_scan = time.time() + SCAN_INTERVAL
+        next_scan = time.time() - 1
 
         self.socket = sock
         while True:
