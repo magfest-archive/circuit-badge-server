@@ -126,6 +126,8 @@ class Component(ApplicationSession):
                 group = badge_id[-1] % 16
                 data = data[group]
 
+                print(data)
+
                 c1 = data[0:3]
                 c2 = data[3:6]
                 c3 = data[6:9]
