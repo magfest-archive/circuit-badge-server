@@ -121,6 +121,7 @@ class Component(ApplicationSession):
     #     //    TO BADGE 0x02: [Reserved, 0] [Reserved, 0] [Reserved, 0]   [GRB GRB GRB GRB ...]  NOTE: For raw packets, only 4 LEDs may be controlled.
     @asyncio.coroutine
     def concert_lights(self, pkt):
+        loop = asyncio.get_event_loop()
         try:
             print("Got concerts ")
             for badge_id in set(self.badge_states.keys()):
@@ -143,7 +144,7 @@ class Component(ApplicationSession):
                 MESSAGE.extend([g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4])
                 #print(bytes(MESSAGE))
 
-                self.send_packet(badge_id, bytes(MESSAGE))
+                yield from loop.run_in_executor(self.send_packet, badge_id, bytes(MESSAGE))
 
                 #self.
                 #self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("BBBBBBBBBBBBB", LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
