@@ -4,6 +4,7 @@ import asyncio
 from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
 import socket
 import struct
+from autobahn import wamp
 import time
 
 BUTTON_RIGHT = 1
@@ -27,32 +28,44 @@ BUTTON_NAMES = {
 }
 
 STATUS_UPDATE = 1
-WIFI_UPDATE = 2
-WIFI_UPDATE_END = 3
-
+LED_CONTROL = 2
+LED_RSSI_MODE = 3
+WIFI_UPDATE = 4
+WIFI_UPDATE_REPLY = 5
+LED_RAINBOW_MODES = 7
+CONFIGURE = 8
+DEEP_SLEEP = 9
 
 class BadgeState:
     @classmethod
     def from_bytes(cls, packet):
         res = cls(
-            packet[0], # wifi_power
-            packet[1], # gpio_state
-            packet[2], # gpio_trigger
-            packet[3], # trigger_direction
-            packet[4], # led_power
-            int.from_bytes(packet[5:7], 'big'), # battery_voltage
-            int.from_bytes(packet[7:9], 'big'), # status_count (sequence number)
+            packet[1], # wifi_power
+            packet[2:8], # connected_bssid
+            packet[8], # gpio_state
+            packet[9], # gpio_trigger
+            packet[10], # trigger_direction
+            packet[11], # led_power
+            int.from_bytes(packet[12:14], 'big'), # batt_voltage
+            int.from_bytes(packet[14:16], 'big'), # update_id
+            int.from_bytes(packet[16:18], 'big'), # heap_free
+            packet[18], # sleep_performance
+            int.from_bytes(packet[20:24], 'big'), # status_count
         )
 
         return res
 
-    def __init__(self, wifi_power, gpio_state, gpio_trigger, trigger_direction, led_power, battery_voltage, status_count):
+    def __init__(self, wifi_power, connected_bssid, gpio_state, gpio_trigger, trigger_direction, led_power, battery_voltage, update_id, heap_free, sleep_performance, status_count):
         self.wifi_power = wifi_power
+        self.connected_bssid = connected_bssid
         self.gpio_state = gpio_state
         self.gpio_trigger = gpio_trigger
         self.trigger_direction = trigger_direction
         self.led_power = led_power
         self.battery_voltage = battery_voltage
+        self.update_id = update_id
+        self.heap_free = heap_free
+        self.sleep_performance = sleep_performance
         self.status_count = status_count
         self.last_update = time.time()
 
@@ -78,7 +91,8 @@ class Component(ApplicationSession):
                     else:
                         self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[1<<i])
 
-    async def onJoin(self, details):
+    @asyncio.coroutine
+    def onJoin(self, details):
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
@@ -92,7 +106,9 @@ class Component(ApplicationSession):
             msg_type = data[6]
             packet = data[7:]
 
+
             if msg_type == STATUS_UPDATE:
+                print("Got status update: ".format(packet))
                 next_state = BadgeState.from_bytes(packet)
 
                 if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
@@ -100,21 +116,24 @@ class Component(ApplicationSession):
 
                 self.send_button_updates(badge_id, next_state)
 
-            elif msg_type == WIFI_UPDATE:
-                scan_id = int.from_bytes(packet[0:6], 'big')
-                scan_len = int.from_bytes(packet[6:8], 'big')
+            elif msg_type == WIFI_UPDATE_REPLY:
+                print("Got wifi reply: ".format(packet))
+                scan_id = int.from_bytes(packet[0:4], 'big')
+                scan_len = int.from_bytes(packet[5], 'big')
 
                 if scan_id not in self.wifi_scans:
                     self.wifi_scans[scan_id] = []
 
-                for i in range(scan_len):
-                    self.wifi_scans[scan_id].append((packet[8+7*i:15+7*i], struct.unpack('b', packet[16+7*i:17+7*i])[0]))
-
-            elif msg_type == WIFI_UPDATE_END:
-                if scan_id in self.wifi_scans:
-                    self.scan_complete(badge_id, scan_id)
+                if scan_len:
+                    for i in range(scan_len):
+                        self.wifi_scans[scan_id].append((packet[6+8*i:14+8*i], packet[12+8*i]-128))
                 else:
-                    print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
+                    if scan_id in self.wifi_scans:
+                        self.scan_complete(badge_id, scan_id)
+                    else:
+                        print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
+
+    @wamp.subscribe(u'me.magbadge.badge.led_update', )
 
     def scan_complete(self, badge_id, scan_id):
         self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
