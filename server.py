@@ -36,7 +36,7 @@ LED_RAINBOW_MODES = 7
 CONFIGURE = 8
 DEEP_SLEEP = 9
 
-SCAN_INTERVAL = 10
+SCAN_INTERVAL = 90
 
 import traceback
 
@@ -112,6 +112,13 @@ class Component(ApplicationSession):
         for badge_id in self.badge_states.keys():
             self.request_scan(badge_id)
 
+    def send_packet_all(self, packet):
+        for badge_id in self.badge_states.keys():
+            self.send_packet(badge_id, packet)
+
+    def rssi_all(self, min, max, intensity):
+        self.send_packet_all(self, b"\x03" + int.to_bytes(min, 1) + int.to_bytes(max, 1) + int.to_bytes(intensity, 1))
+
     @asyncio.coroutine
     def onJoin(self, details):
         counter = 0
@@ -119,6 +126,7 @@ class Component(ApplicationSession):
         sock.bind(('0.0.0.0', 8000))
 
         next_scan = time.time() - 1
+        next_rssi = time.time() - 1
 
         self.socket = sock
         while True:
@@ -167,6 +175,9 @@ class Component(ApplicationSession):
                         self.scan_all()
                     except:
                         traceback.print_exc()
+                if time.time() > next_rssi:
+                    next_rssi = time.time() + 5
+                    self.rssi_all(-60, -70, 128)
             except KeyboardInterrupt:
                 break
             except:
