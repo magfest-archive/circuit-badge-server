@@ -85,7 +85,7 @@ class Component(ApplicationSession):
     socket = None
 
     def send_button_updates(self, badge_id, state):
-        print(state)
+        #print(state)
         if state.gpio_trigger:
             print(state.trigger_direction)
 
