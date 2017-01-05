@@ -124,6 +124,7 @@ class Component(ApplicationSession):
             print("Got concerts ")
             for badge_id in self.badge_states.keys():
                 group = badge_id[-1] % 16
+                data = data[group]
 
                 c1 = data[0]
                 c2 = data[1]
@@ -217,6 +218,7 @@ class Component(ApplicationSession):
                 break
             except:
                 traceback.print_exc()
+            yield from asyncio.sleep(.1)
 
     def scan_complete(self, badge_id, scan_id):
         self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
