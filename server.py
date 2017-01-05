@@ -9,12 +9,12 @@ import time
 
 BUTTON_RIGHT = 1
 BUTTON_DOWN = 2
-BUTTON_LEFT = 4
-BUTTON_UP = 8
-BUTTON_SELECT = 16
-BUTTON_START = 32
-BUTTON_B = 64
-BUTTON_A = 128
+BUTTON_LEFT = 3
+BUTTON_UP = 4
+BUTTON_SELECT = 5
+BUTTON_START = 6
+BUTTON_B = 7
+BUTTON_A = 8
 
 BUTTON_NAMES = {
     BUTTON_RIGHT: "right",
@@ -85,12 +85,12 @@ class Component(ApplicationSession):
     def send_button_updates(self, badge_id, state):
         print(state)
         if state.gpio_trigger:
-            for i in range(8):
-                if state.gpio_trigger & (1<<i):
-                    if state.trigger_direction & (1<<i):
-                        self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[1<<i])
-                    else:
-                        self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[1<<i])
+            print(state.trigger_direction)
+
+            if state.trigger_direction:
+                self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[1<<i])
+            else:
+                self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[1<<i])
 
     @asyncio.coroutine
     def onJoin(self, details):
