@@ -140,6 +140,7 @@ class Component(ApplicationSession):
                 MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
 
                 MESSAGE.extend([g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4])
+                print(bytes(MESSAGE))
 
                 self.send_packet(badge_id, bytes(MESSAGE))
 
