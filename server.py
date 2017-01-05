@@ -110,12 +110,12 @@ class Component(ApplicationSession):
         self.send_packet(badge_id, b'\x04')
 
     def scan_all(self):
-        for badge_id in self.badge_states.keys():
+        for badge_id in set(self.badge_states.keys()):
             self.request_scan(badge_id)
 
     def send_packet_all(self, packet):
         print("sending", packet)
-        for badge_id in self.badge_states.keys():
+        for badge_id in set(self.badge_states.keys()):
             self.send_packet(badge_id, packet)
 
     #     //    TO BADGE 0x02: [Reserved, 0] [Reserved, 0] [Reserved, 0]   [GRB GRB GRB GRB ...]  NOTE: For raw packets, only 4 LEDs may be controlled.
@@ -123,7 +123,7 @@ class Component(ApplicationSession):
     def concert_lights(self, pkt):
         try:
             print("Got concerts ")
-            for badge_id in self.badge_states.keys():
+            for badge_id in set(self.badge_states.keys()):
                 group = badge_id[-1] % 16
                 data = pkt[group]
 
