@@ -89,7 +89,7 @@ class Component(ApplicationSession):
     def send_button_updates(self, badge_id, state):
         #print(state)
         if state.gpio_trigger:
-            print(state.trigger_direction)
+            #print(state.trigger_direction)
 
             if state.trigger_direction:
                 self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
@@ -161,7 +161,7 @@ class Component(ApplicationSession):
                 next_scan = time.time() + SCAN_INTERVAL
                 try:
                     self.scan_all()
-                except e:
+                except Exception as e:
                     print(e)
 
     @wamp.subscribe(u'me.magbadge.badge.led_update', )
