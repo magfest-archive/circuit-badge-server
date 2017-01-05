@@ -145,7 +145,7 @@ class Component(ApplicationSession):
                 elif msg_type == WIFI_UPDATE_REPLY:
                     print("Got wifi reply: ".format(packet))
                     scan_id = int.from_bytes(packet[0:4], 'big')
-                    scan_len = int.from_bytes(packet[4], 'big')
+                    scan_len = packet[4]
 
                     if scan_id not in self.wifi_scans:
                         self.wifi_scans[scan_id] = []
