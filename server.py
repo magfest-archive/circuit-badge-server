@@ -101,7 +101,7 @@ class Component(ApplicationSession):
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_states and self.badge_states[badge_id].ip:
             ip = self.badge_states[badge_id].ip
-            print("Sending packet to ({}, {}): {}".format(ip, 8001, packet))
+            #print("Sending packet to ({}, {}): {}".format(ip, 8001, packet))
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
 
     def request_scan(self, badge_id):
