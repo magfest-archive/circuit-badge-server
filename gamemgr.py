@@ -80,6 +80,7 @@ class GameManager(ApplicationSession):
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
             entered = tuple(badge.buttons)
             if entered in self.join_codes:
+                print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
                 self.player_mapping[badge.id] = game_id
                 self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge.id)
@@ -115,16 +116,19 @@ class GameManager(ApplicationSession):
                 badge.buttons.append(button)
 
                 if len(badge.buttons) and tuple(badge.buttons[-3:]) == EXIT_SEQUENCE:
+                    print("Exit sequence pressed")
                     self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.leave', badge_id)
                     del self.player_mapping[badge_id]
                 else:
+                    print("Button " + button + " pressed")
                     self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.button.down', badge_id, button)
 
             else:
+                print("Button " + button + " released")
                 self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.button.up', badge_id, button)
         else:
             if down:
-                self.check_joincode(badge_id)
+                self.check_joincode(self.badges[badge_id])
 
     @asyncio.coroutine
     def kick_player(self, player):
@@ -133,9 +137,14 @@ class GameManager(ApplicationSession):
 
     @asyncio.coroutine
     def onJoin(self, details):
-        yield from self.subscribe(u'me.magbadge.badge.button.down', self.button_down)
-        yield from self.subscribe(u'me.magbadge.badge.button.up', self.button_up)
-        yield from self.register(u'me.magbadge.app.request_joincode', self.request_joincode)
+        yield from self.subscribe(self.button_down, 'me.magbadge.badge.button.down')
+        yield from self.subscribe(self.button_up, u'me.magbadge.badge.button.up')
+        yield from self.register(self.request_joincode, u'me.magbadge.app.request_joincode')
+        while True:
+            yield from asyncio.sleep(.1)
 
-runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
-runner.run(GameManager)
+try:
+    runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
+    runner.run(GameManager)
+except e:
+    print(e)
