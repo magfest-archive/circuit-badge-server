@@ -126,17 +126,10 @@ class Component(ApplicationSession):
                 group = badge_id[-1] % 16
                 data = pkt[group]
 
-                print(data)
-
                 c1 = data[0:3]
                 c2 = data[3:6]
                 c3 = data[6:9]
                 c4 = data[9:12]
-
-                print(c1)
-                print(c2)
-                print(c3)
-                print(c4)
 
                 r1, g1, b1 = c1
                 r2, g2, b2 = c2
