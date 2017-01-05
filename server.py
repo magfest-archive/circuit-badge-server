@@ -134,6 +134,9 @@ class Component(ApplicationSession):
                 c4 = data[9:12]
 
                 print(c1)
+                print(c2)
+                print(c3)
+                print(c4)
 
                 r1, g1, b1 = c1
                 r2, g2, b2 = c2
