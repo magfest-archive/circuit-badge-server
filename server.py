@@ -148,7 +148,7 @@ class Component(ApplicationSession):
         sock.bind(('0.0.0.0', 8000))
 
         next_scan = time.time() - 1
-        next_rssi = time.time() + 1000000
+        next_rssi = time.time() - 1
 
         self.socket = sock
         while True:
@@ -198,8 +198,10 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
                 if time.time() > next_rssi:
+                    send_packet(badge_id, bytes(0, 0, 0, 0, 0, 0, 0, 0, 0, [[0,0,0],[0,0,0],[0,0,0],[0,0,0]]))
+                                b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
                     next_rssi = time.time() + WIFI_INTERVAL
-                    self.rssi_all(30, 45, 96)
+                    #self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
                 break
             except:
