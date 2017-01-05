@@ -167,6 +167,8 @@ class Component(ApplicationSession):
                         self.scan_all()
                     except:
                         traceback.print_exc()
+            except KeyboardInterrupt:
+                break
             except:
                 traceback.print_exc()
 
