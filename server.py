@@ -37,6 +37,7 @@ CONFIGURE = 8
 DEEP_SLEEP = 9
 
 SCAN_INTERVAL = 90
+WIFI_INTERVAL = 1
 
 import traceback
 
@@ -176,7 +177,7 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
                 if time.time() > next_rssi:
-                    next_rssi = time.time() + 5
+                    next_rssi = time.time() + WIFI_INTERVAL
                     self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
                 break
