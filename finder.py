@@ -18,7 +18,7 @@ class Component(ApplicationSession):
         if res.status_code == 200:
             body = res.json()
             if body.get("success", False):
-                self.publish(u'me.magbadge.badge.location', badge_id, body.get("location"))
+                self.publish(u'me.magbadge.badge.location', badge_id, body.get("location", None))
             else:
                 print("[ERROR] /track returned unsuccessful result, message is: {}".format(body.get("message", "<none present>")))
         else:

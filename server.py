@@ -120,14 +120,16 @@ class Component(ApplicationSession):
             elif msg_type == WIFI_UPDATE_REPLY:
                 print("Got wifi reply: ".format(packet))
                 scan_id = int.from_bytes(packet[0:4], 'big')
-                scan_len = int.from_bytes(packet[5], 'big')
+                scan_len = int.from_bytes(packet[4], 'big')
 
                 if scan_id not in self.wifi_scans:
                     self.wifi_scans[scan_id] = []
 
+                print("Got scan of {} SSIDs from {}".format(scan_len, badge_id))
+
                 if scan_len:
                     for i in range(scan_len):
-                        self.wifi_scans[scan_id].append((packet[6+8*i:14+8*i], packet[12+8*i]-128))
+                        self.wifi_scans[scan_id].append((packet[5+8*i:11+8*i], packet[12+8*i]-128))
                 else:
                     if scan_id in self.wifi_scans:
                         self.scan_complete(badge_id, scan_id)
