@@ -100,6 +100,7 @@ class Component(ApplicationSession):
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
 
     def request_scan(self, badge_id):
+        print("Requesting scan from {}".format(badge_id))
         self.send_packet(badge_id, b'\x04')
 
     def scan_all(self):
@@ -119,14 +120,14 @@ class Component(ApplicationSession):
             data, addr = sock.recvfrom(1024)
             if addr[0] in socket.gethostbyname_ex(socket.gethostname())[2]:
                 continue
-            print("Received udp message from {0}: {1}".format(addr, data))
+            #print("Received udp message from {0}: {1}".format(addr, data))
 
             badge_id = data[0:6]
             msg_type = data[6]
             packet = data[7:]
 
             if msg_type == STATUS_UPDATE:
-                print("Got status update: ".format(packet))
+                #print("Got status update: ".format(packet))
                 next_state = BadgeState.from_bytes(packet)
                 next_state.ip = addr
 
