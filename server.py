@@ -117,7 +117,7 @@ class Component(ApplicationSession):
             self.send_packet(badge_id, packet)
 
     def rssi_all(self, min, max, intensity):
-        self.send_packet_all(self, b"\x03" + int.to_bytes(min, 1) + int.to_bytes(max, 1) + int.to_bytes(intensity, 1))
+        self.send_packet_all(self, b"\x03" + int.to_bytes(min, 1, 'big') + int.to_bytes(max, 1, 'big') + int.to_bytes(intensity, 1, 'big'))
 
     @asyncio.coroutine
     def onJoin(self, details):
