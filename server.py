@@ -83,6 +83,7 @@ class Component(ApplicationSession):
     badge_states = {}
 
     def send_button_updates(self, badge_id, state):
+        print(state)
         if state.gpio_trigger:
             for i in range(8):
                 if state.gpio_trigger & (1<<i):
