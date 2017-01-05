@@ -90,7 +90,7 @@ class Component(ApplicationSession):
     socket = None
 
     def send_button_updates(self, badge_id, state):
-        #print(state)
+        #print(state)b
         if state.gpio_trigger:
             #print(state.trigger_direction)
 
@@ -114,7 +114,7 @@ class Component(ApplicationSession):
             self.request_scan(badge_id)
 
     def send_packet_all(self, packet):
-        print("sending", packet)
+        #print("sending", packet)
         for badge_id in set(self.badge_states.keys()):
             self.send_packet(badge_id, packet)
 
@@ -125,8 +125,8 @@ class Component(ApplicationSession):
             print("Got concerts ")
             for badge_id in set(self.badge_states.keys()):
                 group = 0#badge_id[-1] % 16
+                print(group, end=' ')
                 data = pkt[group]
-                print(data)
 
                 c1 = data[0:3]
                 c2 = data[3:6]
@@ -141,7 +141,7 @@ class Component(ApplicationSession):
                 MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
 
                 MESSAGE.extend([g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4])
-                print(bytes(MESSAGE))
+                #print(bytes(MESSAGE))
 
                 self.send_packet(badge_id, bytes(MESSAGE))
 
