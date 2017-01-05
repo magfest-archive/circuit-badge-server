@@ -136,10 +136,15 @@ class Component(ApplicationSession):
                 r2, g2, b2 = c2
                 r3, g3, b3 = c3
                 r4, g4, b4 = c4
-                yield from asyncio.sleep(.001)
 
+                MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
 
-                self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("BBBBBBBBBBBBB", LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
+                MESSAGE.extend([g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4])
+
+                self.send_packet(badge_id, bytes(MESSAGE))
+
+                #self.
+                #self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("BBBBBBBBBBBBB", LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
         except:
             traceback.print_exc()
 
