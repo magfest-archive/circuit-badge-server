@@ -38,6 +38,8 @@ DEEP_SLEEP = 9
 
 SCAN_INTERVAL = 15
 
+import traceback
+
 class BadgeState:
     @classmethod
     def from_bytes(cls, packet):
@@ -161,8 +163,8 @@ class Component(ApplicationSession):
                 next_scan = time.time() + SCAN_INTERVAL
                 try:
                     self.scan_all()
-                except Exception as e:
-                    print(e)
+                except:
+                    traceback.print_exc()
 
     @wamp.subscribe(u'me.magbadge.badge.led_update', )
     def scan_complete(self, badge_id, scan_id):
