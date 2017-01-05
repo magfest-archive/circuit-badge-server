@@ -202,7 +202,7 @@ class Component(ApplicationSession):
                         traceback.print_exc()
                 if time.time() > next_rssi:
                     MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-                    leds = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 255]]
+                    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
                     for i in leds:
                         MESSAGE.extend(i)
 
