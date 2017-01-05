@@ -114,6 +114,7 @@ class Component(ApplicationSession):
             self.request_scan(badge_id)
 
     def send_packet_all(self, packet):
+        print("sending", packet)
         for badge_id in self.badge_states.keys():
             self.send_packet(badge_id, packet)
 
