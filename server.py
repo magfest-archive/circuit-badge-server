@@ -130,6 +130,8 @@ class Component(ApplicationSession):
                 c3 = data[2]
                 c4 = data[3]
 
+                print(c1)
+
                 r1, g1, b1 = c1
                 r2, g2, b2 = c2
                 r3, g3, b3 = c3
