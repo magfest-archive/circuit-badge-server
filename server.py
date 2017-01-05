@@ -122,50 +122,53 @@ class Component(ApplicationSession):
 
         self.socket = sock
         while True:
-            data, (ip, port) = sock.recvfrom(1024)
-            if ip in socket.gethostbyname_ex(socket.gethostname())[2]:
-                continue
-            #print("Received udp message from {0}: {1}".format(addr, data))
+            try:
+                data, (ip, port) = sock.recvfrom(1024)
+                if ip in socket.gethostbyname_ex(socket.gethostname())[2]:
+                    continue
+                #print("Received udp message from {0}: {1}".format(addr, data))
 
-            badge_id = data[0:6]
-            msg_type = data[6]
-            packet = data[7:]
+                badge_id = data[0:6]
+                msg_type = data[6]
+                packet = data[7:]
 
-            if msg_type == STATUS_UPDATE:
-                #print("Got status update: ".format(packet))
-                next_state = BadgeState.from_bytes(packet)
-                next_state.ip = ip
+                if msg_type == STATUS_UPDATE:
+                    #print("Got status update: ".format(packet))
+                    next_state = BadgeState.from_bytes(packet)
+                    next_state.ip = ip
 
-                if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
-                    self.badge_states[badge_id] = next_state
+                    if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
+                        self.badge_states[badge_id] = next_state
 
-                self.send_button_updates(badge_id, next_state)
+                    self.send_button_updates(badge_id, next_state)
 
-            elif msg_type == WIFI_UPDATE_REPLY:
-                print("Got wifi reply: ".format(packet))
-                scan_id = int.from_bytes(packet[0:4], 'big')
-                scan_len = int.from_bytes(packet[4], 'big')
+                elif msg_type == WIFI_UPDATE_REPLY:
+                    print("Got wifi reply: ".format(packet))
+                    scan_id = int.from_bytes(packet[0:4], 'big')
+                    scan_len = int.from_bytes(packet[4], 'big')
 
-                if scan_id not in self.wifi_scans:
-                    self.wifi_scans[scan_id] = []
+                    if scan_id not in self.wifi_scans:
+                        self.wifi_scans[scan_id] = []
 
-                print("Got scan of {} SSIDs from {}".format(scan_len, badge_id))
+                    print("Got scan of {} SSIDs from {}".format(scan_len, badge_id))
 
-                if scan_len:
-                    for i in range(scan_len):
-                        self.wifi_scans[scan_id].append((packet[5+8*i:11+8*i], packet[12+8*i]-128))
-                else:
-                    if scan_id in self.wifi_scans:
-                        self.scan_complete(badge_id, scan_id)
+                    if scan_len:
+                        for i in range(scan_len):
+                            self.wifi_scans[scan_id].append((packet[5+8*i:11+8*i], packet[12+8*i]-128))
                     else:
-                        print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
+                        if scan_id in self.wifi_scans:
+                            self.scan_complete(badge_id, scan_id)
+                        else:
+                            print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
 
-            if time.time() > next_scan:
-                next_scan = time.time() + SCAN_INTERVAL
-                try:
-                    self.scan_all()
-                except:
-                    traceback.print_exc()
+                if time.time() > next_scan:
+                    next_scan = time.time() + SCAN_INTERVAL
+                    try:
+                        self.scan_all()
+                    except:
+                        traceback.print_exc()
+            except:
+                traceback.print_exc()
 
     def scan_complete(self, badge_id, scan_id):
         self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
