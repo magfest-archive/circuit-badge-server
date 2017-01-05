@@ -134,7 +134,7 @@ class Component(ApplicationSession):
             r3, g3, b3 = c3
             r4, g4, b4 = c4
 
-            send_packet(badge_id, b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
+            self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
 
     def rssi_all(self, min, max, intensity):
         self.send_packet_all(b"\x03" + struct.pack('bbB', min, max, intensity))
@@ -198,7 +198,7 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
                 if time.time() > next_rssi:
-                    send_packet(badge_id, bytes([0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]))
+                    self.send_packet(badge_id, bytes([0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]))
                                 #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
                     next_rssi = time.time() + WIFI_INTERVAL
                     #self.rssi_all(30, 45, 96)
