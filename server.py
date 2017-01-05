@@ -123,7 +123,7 @@ class Component(ApplicationSession):
         self.socket = sock
         while True:
             data, (ip, port) = sock.recvfrom(1024)
-            if addr[0] in socket.gethostbyname_ex(socket.gethostname())[2]:
+            if ip in socket.gethostbyname_ex(socket.gethostname())[2]:
                 continue
             #print("Received udp message from {0}: {1}".format(addr, data))
 
