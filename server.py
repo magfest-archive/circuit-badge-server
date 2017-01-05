@@ -36,6 +36,8 @@ LED_RAINBOW_MODES = 7
 CONFIGURE = 8
 DEEP_SLEEP = 9
 
+SCAN_INTERVAL = 15
+
 class BadgeState:
     @classmethod
     def from_bytes(cls, packet):
@@ -113,7 +115,7 @@ class Component(ApplicationSession):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
 
-        next_scan = time.time() + 60
+        next_scan = time.time() + SCAN_INTERVAL
 
         self.socket = sock
         while True:
@@ -156,7 +158,7 @@ class Component(ApplicationSession):
                         print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
 
             if time.time() > next_scan:
-                next_scan = time.time() + 60
+                next_scan = time.time() + SCAN_INTERVAL
                 self.scan_all()
 
     @wamp.subscribe(u'me.magbadge.badge.led_update', )
