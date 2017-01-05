@@ -39,7 +39,11 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 90
 WIFI_INTERVAL = 10000
 
+import concurrent.futures
+
 import traceback
+
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
 
 class BadgeState:
     @classmethod
@@ -144,7 +148,7 @@ class Component(ApplicationSession):
                 MESSAGE.extend([g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4])
                 #print(bytes(MESSAGE))
 
-                yield from loop.run_in_executor(None, self.send_packet, badge_id, bytes(MESSAGE))
+                yield from loop.run_in_executor(executor, self.send_packet, badge_id, bytes(MESSAGE))
 
                 #self.
                 #self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("BBBBBBBBBBBBB", LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
