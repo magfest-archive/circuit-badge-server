@@ -33,11 +33,11 @@ class Component(ApplicationSession):
             "wifi-fingerprint": scan_data,
         }
 
-        await asyncio.get_event_loop().run_in_executor(None, self.send_scan, badge_id, data)
+        yield from asyncio.get_event_loop().run_in_executor(None, self.send_scan, badge_id, data)
 
     @asyncio.coroutine
     def onJoin(self, details):
-        await self.subscribe(self.scan_received, u'me.magbadge.badge.scan')
+        yield from self.subscribe(self.scan_received, u'me.magbadge.badge.scan')
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
 runner.run(Component)
