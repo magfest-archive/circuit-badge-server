@@ -127,7 +127,7 @@ class Component(ApplicationSession):
     def concert_lights(self, pkt):
         loop = asyncio.get_event_loop()
         try:
-            print("Got concerts ")
+            print(len(self.badge_states), "Got concerts  ")
             for badge_id in set(self.badge_states.keys()):
                 group = 0#badge_id[-1] % 16
                 #print(badge_id[-1] % 16, end=' ')
