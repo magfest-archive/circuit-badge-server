@@ -125,7 +125,7 @@ class Component(ApplicationSession):
             print("Got concerts ")
             for badge_id in set(self.badge_states.keys()):
                 group = 0#badge_id[-1] % 16
-                print(badge_id[-1] % 16, end=' ')
+                #print(badge_id[-1] % 16, end=' ')
                 data = pkt[group]
 
                 c1 = data[0:3]
