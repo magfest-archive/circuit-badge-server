@@ -117,6 +117,23 @@ class Component(ApplicationSession):
         for badge_id in self.badge_states.keys():
             self.send_packet(badge_id, packet)
 
+    #     //    TO BADGE 0x02: [Reserved, 0] [Reserved, 0] [Reserved, 0]   [GRB GRB GRB GRB ...]  NOTE: For raw packets, only 4 LEDs may be controlled.
+    @asyncio.coroutine
+    def concert_lights(self, data):
+        for badge_id in self.badge_states.keys():
+            group = badge_id[-1] % 16
+            c1 = group[0:3]
+            c2 = group[3:6]
+            c3 = group[6:9]
+            c4 = group[9:12]
+
+            r1, g1, b1 = c1
+            r2, g2, b2 = c2
+            r3, g3, b3 = c3
+            r4, g4, b4 = c4
+
+            send_packet(badge_id, b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
+
     def rssi_all(self, min, max, intensity):
         self.send_packet_all(b"\x03" + struct.pack('bbB', min, max, intensity))
 
