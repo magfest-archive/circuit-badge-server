@@ -119,12 +119,12 @@ class Component(ApplicationSession):
 
     #     //    TO BADGE 0x02: [Reserved, 0] [Reserved, 0] [Reserved, 0]   [GRB GRB GRB GRB ...]  NOTE: For raw packets, only 4 LEDs may be controlled.
     @asyncio.coroutine
-    def concert_lights(self, data):
+    def concert_lights(self, pkt):
         try:
             print("Got concerts ")
             for badge_id in self.badge_states.keys():
                 group = badge_id[-1] % 16
-                data = data[group]
+                data = pkt[group]
 
                 print(data)
 
