@@ -88,9 +88,9 @@ class Component(ApplicationSession):
             print(state.trigger_direction)
 
             if state.trigger_direction:
-                self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[1<<i])
+                self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
             else:
-                self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[1<<i])
+                self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
 
     @asyncio.coroutine
     def onJoin(self, details):
