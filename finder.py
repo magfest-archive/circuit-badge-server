@@ -24,7 +24,8 @@ class Component(ApplicationSession):
         else:
             print("[ERROR] /track returned HTTP status code {}".format(res.status_code))
 
-    async def scan_received(self, badge_id, scan_data):
+    @asyncio.coroutine
+    def scan_received(self, badge_id, scan_data):
         data = {
             "group": FIND_GROUP,
             "username": badge_id,
@@ -34,7 +35,8 @@ class Component(ApplicationSession):
 
         await asyncio.get_event_loop().run_in_executor(None, self.send_scan, badge_id, data)
 
-    async def onJoin(self, details):
+    @asyncio.coroutine
+    def onJoin(self, details):
         await self.subscribe(self.scan_received, u'me.magbadge.badge.scan')
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)

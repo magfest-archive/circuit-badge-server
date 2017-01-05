@@ -64,7 +64,8 @@ class GameManager(ApplicationSession):
             self.publish(u'me.magbadge.app.' + game_id + '.join')
             del self.join_codes[joincode]
 
-    async def request_joincode(self, game_id, mode='static', mnemonic='', timeout=120):
+    @asyncio.coroutine
+    def request_joincode(self, game_id, mode='static', mnemonic='', timeout=120):
         code = self.generate_joincode()
         if timeout != 0:
             asyncio.get_event_loop().call_later(timeout, self.expire_joincode, (code,))
@@ -91,13 +92,16 @@ class GameManager(ApplicationSession):
                     self.join_codes[new_code] = game_id, mode, mnemonic, timeout
                     self.publish(u'me.magbadge.app.' + game_id + '.joincode.updated', new_code)
 
-    async def button_down(self, badge_id, button):
-        await self.button_pressed(badge_id, button, True)
+    @asyncio.coroutine
+    def button_down(self, badge_id, button):
+        yield from self.button_pressed(badge_id, button, True)
 
-    async def button_up(self, badge_id, button):
-        await self.button_pressed(badge_id, button, False)
+    @asyncio.coroutine
+    def button_up(self, badge_id, button):
+        yield from self.button_pressed(badge_id, button, False)
 
-    async def button_pressed(self, badge_id, button, down):
+    @asyncio.coroutine
+    def button_pressed(self, badge_id, button, down):
         if badge_id not in self.badges:
             self.badges[badge_id] = Badge(badge_id)
 
@@ -122,14 +126,16 @@ class GameManager(ApplicationSession):
             if down:
                 self.check_joincode(badge_id)
 
-    async def kick_player(self, player):
+    @asyncio.coroutine
+    def kick_player(self, player):
         if player in self.player_mapping:
             del self.player_mapping[player]
 
-    async def onJoin(self, details):
-        await self.subscribe(u'me.magbadge.badge.button.down', self.button_down)
-        await self.subscribe(u'me.magbadge.badge.button.up', self.button_up)
-        await self.register(u'me.magbadge.app.request_joincode', self.request_joincode)
+    @asyncio.coroutine
+    def onJoin(self, details):
+        yield from self.subscribe(u'me.magbadge.badge.button.down', self.button_down)
+        yield from self.subscribe(u'me.magbadge.badge.button.up', self.button_up)
+        yield from self.register(u'me.magbadge.app.request_joincode', self.request_joincode)
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
 runner.run(GameManager)
