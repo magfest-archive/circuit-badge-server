@@ -141,6 +141,8 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def onJoin(self, details):
+        yield from self.register(self.concert_lights, u'me.magbadge.concerts.lights')
+
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
@@ -205,7 +207,6 @@ class Component(ApplicationSession):
 
     def scan_complete(self, badge_id, scan_id):
         self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
-        yield from self.register(self.concert_lights, u'me.magbadge.concerts.lights')
         del self.wifi_scans[scan_id]
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
