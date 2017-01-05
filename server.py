@@ -141,7 +141,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def onJoin(self, details):
-        yield from self.register(self.concert_lights, u'me.magbadge.concerts.lights')
+        yield from self.subscribe(self.concert_lights, u'me.magbadge.concerts.lights')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
