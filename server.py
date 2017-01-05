@@ -144,7 +144,7 @@ class Component(ApplicationSession):
         sock.bind(('0.0.0.0', 8000))
 
         next_scan = time.time() - 1
-        next_rssi = time.time() - 1
+        next_rssi = time.time() + 1000000
 
         self.socket = sock
         while True:
