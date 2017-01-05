@@ -68,6 +68,7 @@ class BadgeState:
         self.sleep_performance = sleep_performance
         self.status_count = status_count
         self.last_update = time.time()
+        self.ip = None
 
     def newer_than(self, other):
         return self.status_count > other.status_count \
@@ -81,6 +82,7 @@ def format_mac(mac):
 class Component(ApplicationSession):
     wifi_scans = {}
     badge_states = {}
+    socket = None
 
     def send_button_updates(self, badge_id, state):
         print(state)
@@ -92,11 +94,27 @@ class Component(ApplicationSession):
             else:
                 self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
 
+    def send_packet(self, badge_id, packet):
+        if badge_id in self.badge_states and self.badge_states[badge_id].ip:
+            ip = self.badge_states[badge_id].ip
+            self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
+
+    def request_scan(self, badge_id):
+        send_packet(badge_id, b'\x04')
+
+    def scan_all(self):
+        for badge_id in self.badge_states.keys():
+            self.request_scan(badge_id)
+
     @asyncio.coroutine
     def onJoin(self, details):
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
+
+        next_scan = time.time() + 60
+
+        self.socket = sock
         while True:
             data, addr = sock.recvfrom(1024)
             if addr[0] in socket.gethostbyname_ex(socket.gethostname())[2]:
@@ -107,10 +125,10 @@ class Component(ApplicationSession):
             msg_type = data[6]
             packet = data[7:]
 
-
             if msg_type == STATUS_UPDATE:
                 print("Got status update: ".format(packet))
                 next_state = BadgeState.from_bytes(packet)
+                next_state.ip = addr
 
                 if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
                     self.badge_states[badge_id] = next_state
@@ -136,8 +154,11 @@ class Component(ApplicationSession):
                     else:
                         print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
 
-    @wamp.subscribe(u'me.magbadge.badge.led_update', )
+            if time.time() > next_scan:
+                next_scan = time.time() + 60
+                self.scan_all()
 
+    @wamp.subscribe(u'me.magbadge.badge.led_update', )
     def scan_complete(self, badge_id, scan_id):
         self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
         del self.wifi_scans[scan_id]

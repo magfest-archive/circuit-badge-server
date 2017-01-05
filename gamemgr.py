@@ -21,12 +21,14 @@ MODE_STATIC = 'static'
 MODE_UNIQUE = 'unique'
 MODE_SINGLE = 'single'
 
+
 def convert_joincode(seq):
     res = []
     for i in range(JOIN_LENGTH):
         res.append(JOIN_KEYS[seq % 6])
         seq //= 6
     return tuple(res)
+
 
 class Badge:
     def __init__(self, badge_id):

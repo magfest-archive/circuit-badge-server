@@ -13,12 +13,15 @@ TRACK_URL = "http://badges.magevent.net:8003/track"
 
 
 class Component(ApplicationSession):
+    locations = {}
+
     def send_scan(self, badge_id, data):
         res = requests.post(TRACK_URL, json=data)
         if res.status_code == 200:
             body = res.json()
             if body.get("success", False):
                 self.publish(u'me.magbadge.badge.location', badge_id, body.get("location", None))
+                self.locations[badge_id] = body.get("location", None)
             else:
                 print("[ERROR] /track returned unsuccessful result, message is: {}".format(body.get("message", "<none present>")))
         else:
@@ -38,6 +41,7 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def onJoin(self, details):
         yield from self.subscribe(self.scan_received, u'me.magbadge.badge.scan')
+
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
 runner.run(Component)
