@@ -177,7 +177,7 @@ class Component(ApplicationSession):
                         traceback.print_exc()
                 if time.time() > next_rssi:
                     next_rssi = time.time() + 5
-                    self.rssi_all(-60, -70, 128)
+                    self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
                 break
             except:
