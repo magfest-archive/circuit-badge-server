@@ -100,7 +100,7 @@ class Component(ApplicationSession):
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
 
     def request_scan(self, badge_id):
-        send_packet(badge_id, b'\x04')
+        self.send_packet(badge_id, b'\x04')''
 
     def scan_all(self):
         for badge_id in self.badge_states.keys():
