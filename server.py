@@ -159,7 +159,10 @@ class Component(ApplicationSession):
 
             if time.time() > next_scan:
                 next_scan = time.time() + SCAN_INTERVAL
-                self.scan_all()
+                try:
+                    self.scan_all()
+                except e:
+                    print(e)
 
     @wamp.subscribe(u'me.magbadge.badge.led_update', )
     def scan_complete(self, badge_id, scan_id):
