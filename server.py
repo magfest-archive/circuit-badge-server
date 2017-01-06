@@ -177,6 +177,9 @@ class Component(ApplicationSession):
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
+                    if not gpio_trigger:
+                        self.set_lights_one(badge_id, 0, 0, 0)
+
                     self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
