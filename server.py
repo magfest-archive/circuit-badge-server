@@ -234,7 +234,7 @@ class Component(ApplicationSession):
     def onJoin(self, details):
         yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
-        yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.join')
+        yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
