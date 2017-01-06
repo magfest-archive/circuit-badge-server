@@ -205,6 +205,7 @@ class Component(ApplicationSession):
 
     def send_packet(self, badge_id, packet):
         debug(badge_id, "packet", packet)
+        debug(badge_id, "game state", self.game_map[badge_id])
         if badge_id in self.badge_ips:
             ip = self.badge_ips[badge_id]
             debug(badge_id, "sending...")
