@@ -42,8 +42,6 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 600
 WIFI_INTERVAL = 10000
 
-ENABLE_CONCERTS = True
-
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
 
 class BadgeState:
@@ -124,7 +122,8 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
         print("Setting lights!")
-        executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
+        self.rssi(badge_id)
+        #executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
 
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
@@ -139,9 +138,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def onJoin(self, details):
-        if ENABLE_CONCERTS:
-            yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
-            #yield from self.subscribe(self.concert_lights, u'me.magbadge.concerts.lights')
+        yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
