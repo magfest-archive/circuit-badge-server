@@ -21,6 +21,7 @@ class Component(ApplicationSession):
         if res.status_code == 200:
             body = res.json()
             if body.get("success", False):
+                print("Sent: ", body)
                 self.publish(u'me.magbadge.badge.location', badge_id, body.get("location", None))
                 self.locations[badge_id] = body.get("location", None)
                 print("Badge {} is in {}".format(badge_id, body.get("location")))
