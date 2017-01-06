@@ -321,17 +321,21 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def morse_code(self, text):
+        print("morsing")
         morse = ' '.join([MORSE_CODE.get(c, '') for c in text.upper()])
         for char in morse:
             if char == '.':
+                print("dot")
                 yield from self.set_lights_nogame(*MORSE_ON)
                 yield from asyncio.sleep(MORSE_DIT)
                 yield from self.set_lights_nogame(*MORSE_OFF)
             elif char == '-':
+                print("dash")
                 yield from self.set_lights_nogame(*MORSE_ON)
                 yield from asyncio.sleep(MORSE_DAH)
                 yield from self.set_lights_nogame(*MORSE_OFF)
             elif char == ' ':
+                print("space")
                 yield from asyncio.sleep(MORSE_SPACE)
 
             if char != ' ':
