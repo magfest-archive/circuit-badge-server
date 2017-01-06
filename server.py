@@ -144,7 +144,6 @@ class Component(ApplicationSession):
 
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
-                self.default_color = (64,) * 12
                 self.game_map[badge.id] = "konami"
                 yield from self.rainbow(badge.id)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
