@@ -177,7 +177,7 @@ class Component(ApplicationSession):
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
                     if not gpio_trigger:
-                        yield from self.set_lights_one(badge_id, 0, 0, 0)
+                        yield from self.set_lights(badge_id, 0, 0, 0, 0, 0 0, 0, 0, 0, 0, 0, 0)
 
                     self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
