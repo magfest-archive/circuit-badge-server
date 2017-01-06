@@ -254,7 +254,7 @@ class Component(ApplicationSession):
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
-                    if gpio_trigger or gpio_state:
+                    if gpio_trigger:
                         button = BUTTON_NAMES[gpio_trigger]
                         if gpio_direction:
                             badge.buttons.append(gpio_trigger)
