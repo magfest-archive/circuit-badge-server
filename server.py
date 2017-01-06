@@ -178,9 +178,9 @@ class Component(ApplicationSession):
                         #print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
 
-                    self.socket.sendto(b'\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\xff\x00\xff', (ip, 8001))
+                    #self.socket.sendto(b'\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\xff\x00\xff', (ip, 8001))
 
-                    self.rainbow(badge_id)
+                    #self.rainbow(badge_id)
 
                     self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
