@@ -165,13 +165,13 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     #print("Got status update: ".format(packet))
-                    gpio_trigger, gpio_direction = packet[8], packet[9]
+                    gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
                     if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
                         print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
 
-                    self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
+                    self.send_button_updates(badge_id, gpio_state, gpio_direction)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
