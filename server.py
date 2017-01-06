@@ -166,7 +166,7 @@ class Component(ApplicationSession):
                     continue
                 #print("Received udp message from {0}: {1}".format(addr, data))
 
-                badge_id = data[0:6]
+                badge_id = format_mac(data[0:6])
                 msg_type = data[6]
                 packet = data[7:]
 
