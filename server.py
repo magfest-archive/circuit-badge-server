@@ -162,7 +162,7 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def kick_player(self, player):
         if player in self.game_map:
-            del self.game_map[player]
+            self.game_map[player] = None
 
     def send_button_updates(self, game, badge, button, down):
         if down:
@@ -266,11 +266,14 @@ class Component(ApplicationSession):
                         button = BUTTON_NAMES[gpio_trigger]
                         if gpio_direction:
                             badge.buttons.append(gpio_trigger)
+
                         if self.game_map[badge_id]:
                             self.send_button_updates(self.game_map[badge_id], badge, button, gpio_direction)
                         else:
-                            yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                            self.check_joincode(badge)
+                            if gpio_direction:
+                                self.check_joincode(badge)
+                    else:
+                        yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
