@@ -102,9 +102,9 @@ class Component(ApplicationSession):
                 self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
 
     def send_packet(self, badge_id, packet):
-        print("SENDING", packet)
         if badge_id in self.badge_states:
             ip = self.badge_states[badge_id]
+            print("SENDING", b'\x00\x00\x00\x00\x00\x00' + packet, "to", ip)
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
 
     def request_scan(self, badge_id):
