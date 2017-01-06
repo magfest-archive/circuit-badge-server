@@ -213,7 +213,7 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
         print("RAINBOW " + badge_id)
-        yield from executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
+        executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
     @asyncio.coroutine
     def rainbow_all(self, *args, **kwargs):
@@ -229,7 +229,7 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
         r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4 = colors
-        yield from executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
+        executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
 
     def rssi(self, badge_id, min=30, max=45, intensity=96):
         self.send_packet(badge_id, struct.pack('BbbB', LED_RSSI_MODE, min, max, intensity))
