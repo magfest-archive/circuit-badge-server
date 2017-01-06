@@ -165,8 +165,6 @@ class Component(ApplicationSession):
 
     def send_button_updates(self, game, badge_id, gpio_trigger, trigger_direction):
         if down:
-            badge.buttons.append(button)
-
             if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                 print("Exit sequence pressed")
                 self.publish(u'me.magbadge.app.' + game + '.user.leave', badge_id)
@@ -257,6 +255,7 @@ class Component(ApplicationSession):
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
                     if gpio_trigger or gpio_state:
+                        badge.buttons.append(button)
                         if self.game_map[badge_id]:
                             self.send_button_updates(self.game_map[badge_id], badge_id, gpio_trigger, gpio_direction)
                         else:
