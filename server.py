@@ -9,6 +9,7 @@ import time
 import pickle
 import concurrent.futures
 import traceback
+import collections
 
 BUTTON_RIGHT = 1
 BUTTON_DOWN = 2
