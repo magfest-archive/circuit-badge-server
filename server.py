@@ -6,6 +6,9 @@ import socket
 import struct
 from autobahn import wamp
 import time
+import pickle
+import concurrent.futures
+import traceback
 
 BUTTON_RIGHT = 1
 BUTTON_DOWN = 2
@@ -41,11 +44,7 @@ WIFI_INTERVAL = 10000
 
 ENABLE_CONCERTS = True
 
-import concurrent.futures
-
-import traceback
-
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
 
 class BadgeState:
     @classmethod
@@ -106,8 +105,8 @@ class Component(ApplicationSession):
                 self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
 
     def send_packet(self, badge_id, packet):
-        if badge_id in self.badge_states and self.badge_states[badge_id].ip:
-            ip = self.badge_states[badge_id].ip
+        if badge_id in self.badge_states:
+            ip = self.badge_states[badge_id]
             #print("Sending packet to ({}, {}): {}".format(ip, 8001, packet))
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
 
@@ -127,12 +126,9 @@ class Component(ApplicationSession):
     #     //    TO BADGE 0x02: [Reserved, 0] [Reserved, 0] [Reserved, 0]   [GRB GRB GRB GRB ...]  NOTE: For raw packets, only 4 LEDs may be controlled.
     @asyncio.coroutine
     def concert_lights(self, pkt):
-        loop = asyncio.get_event_loop()
         try:
-            print(len(self.badge_states), "Got concerts  ")
             for badge_id in set(self.badge_states.keys()):
                 group = 0#badge_id[-1] % 16
-                #print(badge_id[-1] % 16, end=' ')
                 data = pkt[group]
 
                 c1 = data[0:3]
@@ -145,12 +141,7 @@ class Component(ApplicationSession):
                 r3, g3, b3 = c3
                 r4, g4, b4 = c4
 
-                MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-
-                MESSAGE.extend([g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4])
-                #print(bytes(MESSAGE))
-
-                executor.submit(self.send_packet, badge_id, bytes(MESSAGE))
+                executor.submit(self.send_packet, badge_id, bytes([LED_CONTROL, 0x0, 0x00, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4]))
 
                 #self.
                 #self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("BBBBBBBBBBBBB", LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
@@ -174,11 +165,13 @@ class Component(ApplicationSession):
         next_scan = time.time() - 1
         next_rssi = time.time() - 1
 
+        our_ip = socket.gethostbyname_ex(socket.gethostname())[2]
+
         self.socket = sock
         while True:
             try:
                 data, (ip, port) = sock.recvfrom(1024)
-                if ip in socket.gethostbyname_ex(socket.gethostname())[2]:
+                if ip in our_ip:#socket.gethostbyname_ex(socket.gethostname())[2]:
                     continue
                 #print("Received udp message from {0}: {1}".format(addr, data))
 
@@ -191,15 +184,13 @@ class Component(ApplicationSession):
                     next_state = BadgeState.from_bytes(packet)
                     next_state.ip = ip
 
-                    if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
-                        if badge_id not in self.badge_states:
-                            print("{} clients".format(len(self.badge_states)))
+                    if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
+                        print("{} clients".format(len(self.badge_states)))
+                        self.badge_states[badge_id] = ip
 
-                        self.badge_states[badge_id] = next_state
+                    #self.send_button_updates(badge_id, ip)
 
-                    self.send_button_updates(badge_id, next_state)
-
-                elif msg_type == WIFI_UPDATE_REPLY:
+                elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
                     scan_id = int.from_bytes(packet[0:4], 'big')
                     scan_len = packet[4]
@@ -218,27 +209,28 @@ class Component(ApplicationSession):
                         else:
                             print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
 
-                if time.time() > next_scan:
-                    next_scan = time.time() + SCAN_INTERVAL
-                    try:
-                        self.scan_all()
-                    except:
-                        traceback.print_exc()
-                if time.time() > next_rssi:
-                    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-                    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-                    for i in leds:
-                        MESSAGE.extend(i)
-
-                    self.send_packet(badge_id, bytes(MESSAGE))
-                                #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-                    next_rssi = time.time() + WIFI_INTERVAL
-                    #self.rssi_all(30, 45, 96)
+                #if time.time() > next_scan:
+                #    next_scan = time.time() + SCAN_INTERVAL
+                #    try:
+                #        self.scan_all()
+                #    except:
+                #        traceback.print_exc()
+                #if time.time() > next_rssi:
+                #    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
+                #    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                #    for i in leds:
+                #        MESSAGE.extend(i)
+                #
+                #    self.send_packet(badge_id, bytes(MESSAGE))
+                #                #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+                #    next_rssi = time.time() + WIFI_INTERVAL
+                #    #self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
+
                 break
             except:
                 traceback.print_exc()
-            yield from asyncio.sleep(.1)
+            yield from asyncio.sleep(.01)
 
     def scan_complete(self, badge_id, scan_id):
         print("Sending off scan with #{} SSIDs".format(len(self.wifi_scans[scan_id])))
