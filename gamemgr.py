@@ -82,6 +82,7 @@ class GameManager(ApplicationSession):
         self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge_id, mnemonic)
 
     def check_joincode(self, badge):
+        print(len(badge.buttons))
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
             entered = tuple(badge.buttons[-TOTAL_JOIN:])
             if tuple(badge.buttons[-len(KONAMI):]) == KONAMI:
