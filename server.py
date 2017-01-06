@@ -110,6 +110,7 @@ class Component(ApplicationSession):
         self.buttons = {}
         self.join_codes = {}
         self.game_map = {}
+        self.default_color = (0,) * 12
 
     def generate_joincode(self):
         res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
@@ -143,6 +144,7 @@ class Component(ApplicationSession):
 
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
+                self.default_color = (64,) * 12
                 self.game_map[badge.id] = "konami"
                 yield from self.rainbow(badge.id)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
@@ -283,7 +285,7 @@ class Component(ApplicationSession):
                             if not gpio_direction:
                                 yield from self.check_joincode(badge)
                     elif not gpio_state and not self.game_map[badge_id]:
-                        yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                        yield from self.set_lights(badge_id, *self.default_color)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
