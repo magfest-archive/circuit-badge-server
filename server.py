@@ -30,6 +30,8 @@ BUTTON_NAMES = {
     BUTTON_A: "a",
 }
 
+KONAMI = (BUTTON_UP, BUTTON_UP, BUTTON_DOWN, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_LEFT, BUTTON_RIGHT)
+
 STATUS_UPDATE = 1
 LED_CONTROL = 2
 LED_RSSI_MODE = 3
@@ -91,6 +93,7 @@ class Component(ApplicationSession):
     wifi_scans = {}
     badge_states = {}
     socket = None
+    buttons = {}
 
     def send_button_updates(self, badge_id, gpio_trigger, trigger_direction):
         if gpio_trigger:
@@ -98,6 +101,9 @@ class Component(ApplicationSession):
             if trigger_direction:
                 print(BUTTON_NAMES[gpio_trigger] + " down")
                 self.publish(u'me.magbadge.badge.button.down', badge_id, BUTTON_NAMES[gpio_trigger])
+                self.buttons[badge_id].append(gpio_trigger)
+                if tuple(self.buttons[badge_id]) == KONAMI:
+                    self.rainbow(badge_id, 5000, 32, 128, 64)
             else:
                 self.publish(u'me.magbadge.badge.button.up', badge_id, BUTTON_NAMES[gpio_trigger])
 
@@ -172,6 +178,7 @@ class Component(ApplicationSession):
                 if badge_id not in self.badge_states:
                     print("{} clients".format(len(self.badge_states)))
                     self.badge_states[badge_id] = ip
+                    self.buttons[badge_id] = collections.deque(maxlen=8)
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
