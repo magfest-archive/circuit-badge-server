@@ -111,6 +111,14 @@ def format_mac(mac):
     return ':'.join(('%02X' % d for d in mac))
 
 
+class Konami:
+    def __init__(self):
+        self.players = set()
+
+    def add_player(self, badge_id):
+        self.players.add(badge_id)
+
+
 class Component(ApplicationSession):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -122,6 +130,7 @@ class Component(ApplicationSession):
         self.join_codes = {}
         self.game_map = {}
         self.default_color = (0,) * 12
+        self.konami = Konami()
 
     def generate_joincode(self):
         res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
@@ -195,20 +204,25 @@ class Component(ApplicationSession):
             self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button, options=PublishOptions(exclude_me=False))
 
     @asyncio.coroutine
-    def konami_button(self, badge_id, button):
-        debug(badge_id, "konami! button " + button)
-        if button == 'a':
-            yield from self.set_lights(badge_id, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0)
-        elif button == 'b':
-            yield from self.set_lights(badge_id, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0)
-        elif button == 'up':
-            yield from self.set_lights(badge_id, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128)
-        elif button == 'down':
-            yield from self.set_lights(badge_id, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128)
-        elif button == 'left':
-            yield from self.set_lights(badge_id, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128)
-        elif button == 'right':
-            yield from self.set_lights(badge_id, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0)
+    def konami_button(self, sender, button):
+        debug(sender, "konami! button " + button)
+        for badge_id in self.konami.players:
+            if button == 'a':
+                yield from self.set_lights(badge_id, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0)
+            elif button == 'b':
+                yield from self.set_lights(badge_id, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0)
+            elif button == 'up':
+                yield from self.set_lights(badge_id, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128)
+            elif button == 'down':
+                yield from self.set_lights(badge_id, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128)
+            elif button == 'left':
+                yield from self.set_lights(badge_id, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128)
+            elif button == 'right':
+                yield from self.set_lights(badge_id, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0)
+            elif button == 'start':
+                self.konami.players.remove(sender)
+                yield from self.set_lights(sender, ((0,) * 12))
+                yield from self.kick_player(sender)
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
