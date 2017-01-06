@@ -119,10 +119,17 @@ class Component(ApplicationSession):
         for badge_id in set(self.badge_states.keys()):
             self.send_packet(badge_id, packet)
 
+    def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
+        self.send_packet(badge_id, struct.pack(">BHBBB", LED_RAINBOW_MODES, runtime, speed, intensity, offset))
+
+    def rainbow_all(self, badge_id, *args, **kwargs):
+        for badge_id in set(self.badge_states.keys()):
+            self.rainbow(badge_id, *args, **kwargs)
+
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
         print("Setting lights!")
-        self.rssi(badge_id)
+        self.rainbow(badge_id)
         #executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
 
     @asyncio.coroutine
