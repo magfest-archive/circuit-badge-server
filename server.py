@@ -98,6 +98,7 @@ class Component(ApplicationSession):
         if gpio_trigger:
 
             if trigger_direction:
+                print(BUTTON_NAMES[gpio_trigger] + " down")
                 self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
             else:
                 self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
@@ -168,9 +169,6 @@ class Component(ApplicationSession):
                     if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
                         #print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
-
-                    if gpio_trigger:
-                        print(gpio_state, gpio_trigger, gpio_direction)
 
                     self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
