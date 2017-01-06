@@ -238,7 +238,8 @@ class Component(ApplicationSession):
             yield from asyncio.sleep(.1)
 
     def scan_complete(self, badge_id, scan_id):
-        self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
+        if len(self.wifi_scans[scan_id]):
+            self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
         del self.wifi_scans[scan_id]
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
