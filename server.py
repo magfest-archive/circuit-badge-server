@@ -46,11 +46,11 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 600
 WIFI_INTERVAL = 10000
 
-EXIT_SEQUENCE = ['start', 'start', 'start']
-JOIN_PREFIX = ('start', 'select')
+EXIT_SEQUENCE = (BUTTON_START,) * 3
+JOIN_PREFIX = (BUTTON_START, BUTTON_SELECT)
 # Not including prefix
 JOIN_LENGTH = 4
-JOIN_KEYS = ['up', 'down', 'left', 'right', 'a', 'b']
+JOIN_KEYS = (BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_A, BUTTON_B)
 TOTAL_JOIN = JOIN_LENGTH + len(JOIN_PREFIX)
 
 JOIN_INDEX_MAX = 6**4 # 1296
@@ -172,10 +172,15 @@ class Component(ApplicationSession):
                 self.game_map[badge.id] = None
             else:
                 print("[ " + game + " ] Button " + button + " pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button)
+                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, BUTTON_NAMES[button])
         else:
             print("Button " + button + " released")
-            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button)
+            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, BUTTON_NAMES[button])
+
+    @asyncio.coroutine
+    def konami_button(self, badge_id, button):
+        if button == 'a':
+            self.set_lights(badge_id, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0)
 
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_ips:
