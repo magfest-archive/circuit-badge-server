@@ -196,7 +196,7 @@ class Component(ApplicationSession):
     def konami_button(self, badge_id, button):
         print("konami! button " + button)
         if button == 'a':
-            self.set_lights(badge_id, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0)
+            yield from self.set_lights(badge_id, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0)
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
