@@ -12,6 +12,7 @@ import traceback
 import collections
 import random
 from autobahn.wamp.types import PublishOptions
+import json
 
 BUTTON_RIGHT = 1
 BUTTON_DOWN = 2
@@ -112,8 +113,17 @@ def format_mac(mac):
 
 
 class Konami:
+    COLOR_MAP = {
+        'a': (128, 0, 0),
+        'b': (0, 128, 0),
+        'up': (0, 0, 128),
+        'down': (0, 128, 28),
+        'left': (128, 0, 128),
+        'right': (128, 128, 0),
+    }
     def __init__(self):
         self.players = set()
+        self.color = (0, 255, 255)
 
     def add_player(self, badge_id):
         self.players.add(badge_id)
@@ -207,29 +217,24 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def konami_button(self, sender, button):
         debug(sender, "konami! button " + button)
-        for badge_id in self.konami.players:
-            if button == 'a':
-                yield from self.set_lights(badge_id, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0)
-            elif button == 'b':
-                yield from self.set_lights(badge_id, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0)
-            elif button == 'up':
-                yield from self.set_lights(badge_id, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128)
-            elif button == 'down':
-                yield from self.set_lights(badge_id, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128)
-            elif button == 'left':
-                yield from self.set_lights(badge_id, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128)
-            elif button == 'right':
-                yield from self.set_lights(badge_id, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0)
-            elif button == 'start':
-                self.konami.players.remove(sender)
-                yield from self.set_lights(sender, *((0,) * 12))
-                yield from self.kick_player(sender)
+        if button == 'start':
+            self.konami.players.remove(sender)
+            yield from self.set_lights(sender, *((0,) * 12))
+            yield from self.kick_player(sender)
+        elif button == 'select':
+            pass
+        else:
+            self.konami.color = Konami.COLOR_MAP[button]
+            for badge_id in set(self.konami.players):
+                yield from self.set_lights(badge_id, *(self.konami.color * 4))
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
         debug(badge_id, "rainbowing")
         self.konami.add_player(badge_id)
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
+        yield from asyncio.sleep(2)
+        yield from self.set_lights(badge_id, *(self.konami.color * 4))
 
     def send_packet(self, badge_id, packet):
         debug(badge_id, "packet", packet)
@@ -288,6 +293,15 @@ class Component(ApplicationSession):
         yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
         yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
 
+        try:
+            with open('state.json') as f:
+                res = json.load(f)
+                self.badge_map = res.get('badge_map', {})
+                self.badge_ips = res.get('badge_ips', {})
+                self.game_map = res.get('game_map', {})
+        except OSError:
+            pass
+
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
@@ -312,8 +326,10 @@ class Component(ApplicationSession):
                     if not len(self.badge_ips) % 10:
                         print("{} clients".format(len(self.badge_ips)))
                     self.badge_ips[badge_id] = ip
-                    self.badges[badge_id] = Badge(badge_id)
                     self.game_map[badge_id] = None
+
+                if badge_id not in self.badges:
+                    self.badges[badge_id] = Badge(badge_id)
 
                 badge = self.badges[badge_id]
 
@@ -360,6 +376,12 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
             except KeyboardInterrupt:
+                with open('state.json', 'w') as f:
+                    json.dump({
+                        'badge_ips': self.badge_ips,
+                        'join_codes': self.join_codes,
+                        'game_map': self.game_map,
+                    }, f)
                 break
             except:
                 traceback.print_exc()
