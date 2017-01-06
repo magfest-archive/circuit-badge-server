@@ -40,6 +40,8 @@ class Component(ApplicationSession):
             "wifi-fingerprint": scan_data,
         }
 
+        print("Got scan")
+
         yield from asyncio.get_event_loop().run_in_executor(None, self.send_scan, badge_id, data)
 
     @asyncio.coroutine
