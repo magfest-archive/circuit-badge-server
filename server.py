@@ -142,7 +142,7 @@ class Component(ApplicationSession):
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
                 self.rainbow(badge.id, 5000, 32, 128, 64)
-                self.game_map[badge_id] = "konami"
+                self.game_map[badge.id] = "konami"
                 print("KONAMI")
             if entered in self.join_codes:
                 print("Joincode entered!")
