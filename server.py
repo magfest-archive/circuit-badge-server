@@ -90,6 +90,7 @@ class BadgeState:
 def format_mac(mac):
     return ':'.join(('%02X' % d for d in mac))
 
+KONAMI_ING = collections.deque(maxlen=5)
 
 class Component(ApplicationSession):
     wifi_scans = {}
@@ -107,6 +108,7 @@ class Component(ApplicationSession):
                 if tuple(self.buttons[badge_id]) == KONAMI:
                     print("KONAMI")
                     self.rainbow(badge_id, 5000, 32, 128, 64)
+                    KONAMI_ING.append(badge_id)
             else:
                 self.publish(u'me.magbadge.badge.button.up', badge_id, BUTTON_NAMES[gpio_trigger])
 
@@ -186,7 +188,7 @@ class Component(ApplicationSession):
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
-                    if not gpio_trigger and not gpio_state and random.random() > .66 and tuple(self.buttons[badge_id]) != KONAMI:
+                    if not gpio_trigger and not gpio_state and badge_id not in tuple(KONAMI_ING):
                         print("resetting")
                         yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
