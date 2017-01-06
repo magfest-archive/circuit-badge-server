@@ -86,7 +86,7 @@ class GameManager(ApplicationSession):
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
             entered = tuple(badge.buttons)[-TOTAL_JOIN:]
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
-                self.publish(u'me.magbadge.badge.lights', 255, 0, 0)
+                self.publish(u'me.magbadge.badge.lights', badge.id, 255, 0, 0)
                 print("KONAMI")
             if entered in self.join_codes:
                 print("Joincode entered!")
