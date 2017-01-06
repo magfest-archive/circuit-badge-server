@@ -101,6 +101,7 @@ class GameManager(ApplicationSession):
 
     @asyncio.coroutine
     def button_down(self, badge_id, button):
+        print(button + " down")
         yield from self.button_pressed(badge_id, button, True)
 
     @asyncio.coroutine
