@@ -207,8 +207,9 @@ class Component(ApplicationSession):
         debug(badge_id, "packet", packet)
         if badge_id in self.badge_ips:
             ip = self.badge_ips[badge_id]
-            for _ in range(3):
-                self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
+            debug(badge_id, "sending...")
+            self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
+            debug(badge_id, "sent the packet")
         else:
             print("LOL NOPE CAN'T DO THAT")
 
