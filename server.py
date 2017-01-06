@@ -272,7 +272,7 @@ class Component(ApplicationSession):
                         else:
                             if gpio_direction:
                                 self.check_joincode(badge)
-                    else:
+                    elif not self.game_map[badge_id]:
                         yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
