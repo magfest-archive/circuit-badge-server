@@ -138,10 +138,11 @@ class GameManager(ApplicationSession):
                     self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.button.down', badge_id, button)
 
             else:
+                self.check_joincode(self.badges[badge_id])
+        else:
+            if badge_id in self.player_mapping:
                 print("Button " + button + " released")
                 self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.button.up', badge_id, button)
-        else:
-            self.check_joincode(self.badges[badge_id])
 
     @asyncio.coroutine
     def kick_player(self, player):
