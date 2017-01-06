@@ -36,7 +36,7 @@ def convert_joincode(seq):
 class Badge:
     def __init__(self, badge_id):
         self.id = badge_id
-        self.buttons = collections.deque(maxlen=len(JOIN_PREFIX)+JOIN_LENGTH)
+        self.buttons = collections.deque(maxlen=max(TOTAL_JOIN, KONAMI))
         self.game = None
         self.join_time = 0
         self.last_update = 0
