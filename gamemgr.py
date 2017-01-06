@@ -106,14 +106,14 @@ class GameManager(ApplicationSession):
     @asyncio.coroutine
     def button_down(self, badge_id, button):
         print(button + " down")
-        yield from self.button_pressed(badge_id, button, False)
-
-    @asyncio.coroutine
-    def button_up(self, badge_id, button):
         yield from self.button_pressed(badge_id, button, True)
 
     @asyncio.coroutine
-    def button_pressed(self, badge_id, button, up):
+    def button_up(self, badge_id, button):
+        yield from self.button_pressed(badge_id, button, False)
+
+    @asyncio.coroutine
+    def button_pressed(self, badge_id, button, down):
         if badge_id not in self.badges:
             self.badges[badge_id] = Badge(badge_id)
 
@@ -126,7 +126,7 @@ class GameManager(ApplicationSession):
         else:
             badge = self.badges[badge_id]
 
-        if up:
+        if down:
             badge.buttons.append(button)
 
             if badge_id in self.player_mapping:
