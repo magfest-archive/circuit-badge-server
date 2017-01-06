@@ -172,10 +172,10 @@ class Component(ApplicationSession):
                 self.game_map[badge.id] = None
             else:
                 print("[ " + game + " ] Button " + button + " pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, BUTTON_NAMES[button])
+                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button)
         else:
             print("Button " + button + " released")
-            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, BUTTON_NAMES[button])
+            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button)
 
     @asyncio.coroutine
     def konami_button(self, badge_id, button):
