@@ -204,6 +204,7 @@ class Component(ApplicationSession):
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
 
     def send_packet(self, badge_id, packet):
+        debug(badge_id, "packet", packet)
         if badge_id in self.badge_ips:
             ip = self.badge_ips[badge_id]
             for _ in range(3):
