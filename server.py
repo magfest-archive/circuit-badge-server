@@ -170,8 +170,8 @@ class Component(ApplicationSession):
                 msg_type = data[6]
                 packet = data[7:]
 
-                if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
-                    #print("{} clients".format(len(self.badge_states)))
+                if badge_id not in self.badge_states:
+                    print("{} clients".format(len(self.badge_states)))
                     self.badge_states[badge_id] = ip
 
                 if msg_type == STATUS_UPDATE:
