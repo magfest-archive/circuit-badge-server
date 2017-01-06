@@ -135,6 +135,7 @@ class Component(ApplicationSession):
         self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge_id, mnemonic)
 
     def check_joincode(self, badge):
+        print("Checking joincode")
         print(len(badge.buttons))
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
             entered = tuple(badge.buttons)[-TOTAL_JOIN:]
@@ -236,9 +237,8 @@ class Component(ApplicationSession):
         while True:
             try:
                 data, (ip, port) = sock.recvfrom(1024)
-                if ip in our_ip:#socket.gethostbyname_ex(socket.gethostname())[2]:
+                if ip in our_ip:
                     continue
-                #print("Received udp message from {0}: {1}".format(addr, data))
 
                 badge_id = format_mac(data[0:6])
                 msg_type = data[6]
