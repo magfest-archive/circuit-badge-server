@@ -163,18 +163,18 @@ class Component(ApplicationSession):
         if player in self.game_map:
             del self.game_map[player]
 
-    def send_button_updates(self, game, badge_id, button, down):
+    def send_button_updates(self, game, badge, button, down):
         if down:
             if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                 print("Exit sequence pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.leave', badge_id)
-                self.game_map[badge_id] = None
+                self.publish(u'me.magbadge.app.' + game + '.user.leave', badge.id)
+                self.game_map[badge.id] = None
             else:
                 print("Button " + button + " pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge_id, button)
+                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button)
         else:
             print("Button " + button + " released")
-            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge_id, button)
+            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button)
 
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_ips:
@@ -259,7 +259,7 @@ class Component(ApplicationSession):
                         if gpio_direction:
                             badge.buttons.append(gpio_trigger)
                         if self.game_map[badge_id]:
-                            self.send_button_updates(self.game_map[badge_id], badge_id, button, gpio_direction)
+                            self.send_button_updates(self.game_map[badge_id], badge, button, gpio_direction)
                         else:
                             yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
                             self.check_joincode(badge)
