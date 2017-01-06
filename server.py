@@ -256,7 +256,8 @@ class Component(ApplicationSession):
 
                     if gpio_trigger or gpio_state:
                         button = BUTTON_NAMES[gpio_trigger]
-                        badge.buttons.append(button)
+                        if gpio_direction:
+                            badge.buttons.append(gpio_trigger)
                         if self.game_map[badge_id]:
                             self.send_button_updates(self.game_map[badge_id], badge_id, button, gpio_direction)
                         else:
