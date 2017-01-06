@@ -39,7 +39,7 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 30
 WIFI_INTERVAL = 10000
 
-ENABLE_CONCERTS = False
+ENABLE_CONCERTS = True
 
 import concurrent.futures
 
