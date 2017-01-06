@@ -243,6 +243,7 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
         r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4 = colors
+        debug(badge_id, 'setting lights')
         executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
 
     def rssi(self, badge_id, min=30, max=45, intensity=96):
@@ -299,6 +300,7 @@ class Component(ApplicationSession):
                             if not gpio_direction:
                                 yield from self.check_joincode(badge)
                     elif not gpio_state and not self.game_map[badge_id]:
+                        debug(badge_id, 'no gpio received and game map is', self.game_map[badge_id])
                         yield from self.set_lights(badge_id, *self.default_color)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
