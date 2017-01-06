@@ -222,7 +222,7 @@ class Component(ApplicationSession):
                 yield from self.set_lights(badge_id, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0)
             elif button == 'start':
                 self.konami.players.remove(sender)
-                yield from self.set_lights(sender, ((0,) * 12))
+                yield from self.set_lights(sender, *((0,) * 12))
                 yield from self.kick_player(sender)
 
     @asyncio.coroutine
