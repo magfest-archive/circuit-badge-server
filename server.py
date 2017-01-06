@@ -46,9 +46,30 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 600
 WIFI_INTERVAL = 10000
 
+EXIT_SEQUENCE = ['start', 'start', 'start']
+JOIN_PREFIX = ('start', 'select')
+# Not including prefix
+JOIN_LENGTH = 4
+JOIN_KEYS = ['up', 'down', 'left', 'right', 'a', 'b']
+TOTAL_JOIN = JOIN_LENGTH + len(JOIN_PREFIX)
+
+JOIN_INDEX_MAX = 6**4 # 1296
+
+MODE_STATIC = 'static'
+MODE_UNIQUE = 'unique'
+MODE_SINGLE = 'single'
+
+
+def convert_joincode(seq):
+    res = []
+    for i in range(JOIN_LENGTH):
+        res.append(JOIN_KEYS[seq % 6])
+        seq //= 6
+    return tuple(res)
+
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
 
-class BadgeState:
+class Badge:
     @classmethod
     def from_bytes(cls, packet):
         res = cls(
@@ -67,54 +88,97 @@ class BadgeState:
 
         return res
 
-    def __init__(self, wifi_power, connected_bssid, gpio_state, gpio_trigger, trigger_direction, led_power, battery_voltage, update_id, heap_free, sleep_performance, status_count):
-        self.wifi_power = wifi_power
-        self.connected_bssid = connected_bssid
-        self.gpio_state = gpio_state
-        self.gpio_trigger = gpio_trigger
-        self.trigger_direction = trigger_direction
-        self.led_power = led_power
-        self.battery_voltage = battery_voltage
-        self.update_id = update_id
-        self.heap_free = heap_free
-        self.sleep_performance = sleep_performance
-        self.status_count = status_count
-        self.last_update = time.time()
-        self.ip = None
-
-    def newer_than(self, other):
-        return self.status_count > other.status_count \
-               or (self.status_count < 64 and other.status_count >= 2 ** 16 - 64)
+    def __init__(self, badge_id):
+        self.id = badge_id
+        self.buttons = collections.deque(maxlen=max(TOTAL_JOIN, len(KONAMI)))
+        self.game = None
+        self.join_time = 0
+        self.last_update = 0
 
 
 def format_mac(mac):
     return ':'.join(('%02X' % d for d in mac))
 
-KONAMI_ING = collections.deque(maxlen=5)
 
 class Component(ApplicationSession):
-    wifi_scans = {}
-    badge_states = {}
-    socket = None
-    buttons = {}
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wifi_scans = {}
+        self.badge_ips = {}
+        self.badges = {}
+        self.socket = None
+        self.buttons = {}
+        self.join_codes = {}
+        self.game_map = {}
 
-    def send_button_updates(self, badge_id, gpio_trigger, trigger_direction):
-        if gpio_trigger:
+    def generate_joincode(self):
+        res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
+        self._join_index += 1
+        return res
 
-            if trigger_direction:
-                print(BUTTON_NAMES[gpio_trigger] + " down")
-                self.publish(u'me.magbadge.badge.button.down', badge_id, BUTTON_NAMES[gpio_trigger])
-                self.buttons[badge_id].append(gpio_trigger)
-                if tuple(self.buttons[badge_id]) == KONAMI:
-                    print("KONAMI")
-                    self.rainbow(badge_id, 5000, 32, 128, 64)
-                    KONAMI_ING.append(badge_id)
+    def expire_joincode(self, joincode):
+        if joincode in self.join_codes:
+            game_id, mode, mnemonic, timeout = self.join_codes[joincode]
+            self.publish(u'me.magbadge.app.' + game_id + '.join')
+            del self.join_codes[joincode]
+
+    @asyncio.coroutine
+    def request_joincode(self, game_id, mode='static', mnemonic='', timeout=120):
+        code = self.generate_joincode()
+        if timeout != 0:
+            asyncio.get_event_loop().call_later(timeout, self.expire_joincode, (code,))
+        self.join_codes[code] = game_id, MODE_UNIQUE, mnemonic, timeout
+        return code
+
+    def on_joincode(self, badge_id, joincode):
+        game_id, mode, mnemonic, timeout = self.join_codes[joincode]
+        self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge_id, mnemonic)
+
+    def check_joincode(self, badge):
+        print(len(badge.buttons))
+        if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
+            entered = tuple(badge.buttons)[-TOTAL_JOIN:]
+            if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
+                print("KONAMI")
+                self.rainbow(badge.id, 5000, 32, 128, 64)
+                print("KONAMI")
+            if entered in self.join_codes:
+                print("Joincode entered!")
+                game_id, mode, mnemonic, timeout = self.join_codes[entered]
+                self.player_mapping[badge.id] = game_id
+                self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge.id)
+
+                if mode == MODE_STATIC:
+                    pass
+                elif mode == MODE_UNIQUE:
+                    del self.join_codes[entered]
+                    new_code = self.generate_joincode()
+                    self.join_codes[new_code] = game_id, mode, mnemonic, timeout
+                    self.publish(u'me.magbadge.app.' + game_id + '.joincode.updated', new_code)
+
+    @asyncio.coroutine
+    def kick_player(self, player):
+        if player in self.player_mapping:
+            del self.player_mapping[player]
+
+    def send_button_updates(self, game, badge_id, gpio_trigger, trigger_direction):
+        if down:
+            badge.buttons.append(button)
+
+            if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
+                print("Exit sequence pressed")
+                self.publish(u'me.magbadge.app.' + game + '.user.leave', badge_id)
+                self.game_map[badge_id] = None
             else:
-                self.publish(u'me.magbadge.badge.button.up', badge_id, BUTTON_NAMES[gpio_trigger])
+                print("Button " + button + " pressed")
+                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge_id, button)
+        else:
+            print("Button " + button + " released")
+            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge_id, button)
 
     def send_packet(self, badge_id, packet):
-        if badge_id in self.badge_states:
-            ip = self.badge_states[badge_id]
+        if badge_id in self.badge_ips:
+            ip = self.badge_ips[badge_id]
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
         else:
             print("LOL NOPE CAN'T DO THAT")
@@ -124,18 +188,18 @@ class Component(ApplicationSession):
         self.send_packet(badge_id, b'\x04')
 
     def scan_all(self):
-        for badge_id in set(self.badge_states.keys()):
+        for badge_id in set(self.badge_ips.keys()):
             self.request_scan(badge_id)
 
     def send_packet_all(self, packet):
-        for badge_id in set(self.badge_states.keys()):
+        for badge_id in set(self.badge_ips.keys()):
             self.send_packet(badge_id, packet)
 
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
         self.send_packet(badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
     def rainbow_all(self, *args, **kwargs):
-        for badge_id in set(self.badge_states.keys()):
+        for badge_id in set(self.badge_ips.keys()):
             self.rainbow(badge_id, *args, **kwargs)
 
     @asyncio.coroutine
@@ -180,19 +244,21 @@ class Component(ApplicationSession):
                 msg_type = data[6]
                 packet = data[7:]
 
-                if badge_id not in self.badge_states:
-                    print("{} clients".format(len(self.badge_states)))
-                    self.badge_states[badge_id] = ip
-                    self.buttons[badge_id] = collections.deque(maxlen=8)
+                if badge_id not in self.badge_ips:
+                    print("{} clients".format(len(self.badge_ips)))
+                    self.badge_ips[badge_id] = ip
+                    self.badges[badge_id] = Badge(badge_id)
+                    self.game_map[badge_id] = None
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
-                    if not gpio_trigger and not gpio_state and badge_id not in tuple(KONAMI_ING):
-                        print("resetting")
-                        yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-                    self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
+                    if gpio_trigger or gpio_state:
+                        if self.game_map[badge_id]:
+                            self.send_button_updates(self.game_map[badge_id], badge_id, gpio_trigger, gpio_direction)
+                        else:
+                            yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                            self.check_joincode(badge)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
