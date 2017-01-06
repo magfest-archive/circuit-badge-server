@@ -180,6 +180,7 @@ class Component(ApplicationSession):
             self.game_map[player] = None
 
     def send_button_updates(self, game, badge, button, down):
+        debug(badge.id, "sending button updates")
         if down:
             if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                 debug(badge.id, "Exit sequence pressed")
@@ -187,10 +188,10 @@ class Component(ApplicationSession):
                 self.game_map[badge.id] = None
             else:
                 debug(badge.id, "[ " + game + " ] Button " + button + " pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button)
+                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button, options={'exclude_me': False})
         else:
             debug(badge.id, "Button " + button + " released")
-            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button)
+            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button, options={'exclude_me': False})
 
     @asyncio.coroutine
     def konami_button(self, badge_id, button):
