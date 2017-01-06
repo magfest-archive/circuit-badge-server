@@ -123,34 +123,19 @@ class Component(ApplicationSession):
         for badge_id in set(self.badge_states.keys()):
             self.send_packet(badge_id, packet)
 
-    #     //    TO BADGE 0x02: [Reserved, 0] [Reserved, 0] [Reserved, 0]   [GRB GRB GRB GRB ...]  NOTE: For raw packets, only 4 LEDs may be controlled.
     @asyncio.coroutine
-    def concert_lights(self, pkt):
-        try:
-            for badge_id in set(self.badge_states.keys()):
-                group = 0#badge_id[-1] % 16
-                data = pkt[group]
+    def set_lights_one(self, badge_id, r, g, b):
+        executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, ) + (g, r, b) * 4))
 
-                c1 = data[0:3]
-                c2 = data[3:6]
-                c3 = data[6:9]
-                c4 = data[9:12]
+    @asyncio.coroutine
+    def set_lights(self, badge_id, *colors):
+        r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4 = colors
+        self.send_packet(badge_id, bytes((LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
 
-                r1, g1, b1 = c1
-                r2, g2, b2 = c2
-                r3, g3, b3 = c3
-                r4, g4, b4 = c4
+    def rssi(self, badge_id, min=30, max=45, intensity=96):
+        self.send_packet(badge_id, struct.pack('BbbB', LED_RSSI_MODE, min, max, intensity))
 
-                executor.submit(self.send_packet, badge_id, bytes([LED_CONTROL, 0x0, 0x00, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4]))
-
-                #self.
-                #self.send_packet(badge_id, b"\x00\x00\x00" + struct.pack("BBBBBBBBBBBBB", LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4))
-        except KeyboardInterrupt:
-            raise
-        except:
-            traceback.print_exc()
-
-    def rssi_all(self, min, max, intensity):
+    def rssi_all(self, min=30, max=45, intensity=96):
         self.send_packet_all(b"\x03" + struct.pack('bbB', min, max, intensity))
 
     @asyncio.coroutine
@@ -188,7 +173,7 @@ class Component(ApplicationSession):
                         print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
 
-                    #self.send_button_updates(badge_id, ip)
+                    self.send_button_updates(badge_id, ip)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
@@ -209,22 +194,22 @@ class Component(ApplicationSession):
                         else:
                             print("[WARN]: Got WIFI UPDATE END for nonexistent scan ID")
 
-                #if time.time() > next_scan:
-                #    next_scan = time.time() + SCAN_INTERVAL
-                #    try:
-                #        self.scan_all()
-                #    except:
-                #        traceback.print_exc()
-                #if time.time() > next_rssi:
-                #    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-                #    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-                #    for i in leds:
-                #        MESSAGE.extend(i)
-                #
-                #    self.send_packet(badge_id, bytes(MESSAGE))
-                #                #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-                #    next_rssi = time.time() + WIFI_INTERVAL
-                #    #self.rssi_all(30, 45, 96)
+                if time.time() > next_scan:
+                    next_scan = time.time() + SCAN_INTERVAL
+                    try:
+                        self.scan_all()
+                    except:
+                        traceback.print_exc()
+                if time.time() > next_rssi:
+                    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
+                    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    for i in leds:
+                        MESSAGE.extend(i)
+
+                    self.send_packet(badge_id, bytes(MESSAGE))
+                                #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+                    next_rssi = time.time() + WIFI_INTERVAL
+                    #self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
 
                 break
@@ -236,6 +221,7 @@ class Component(ApplicationSession):
         print("Sending off scan with #{} SSIDs".format(len(self.wifi_scans[scan_id])))
         if len(self.wifi_scans[scan_id]):
             self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
+            self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         del self.wifi_scans[scan_id]
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)

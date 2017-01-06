@@ -15,6 +15,8 @@ JOIN_PREFIX = ('start', 'select')
 JOIN_LENGTH = 4
 JOIN_KEYS = ['up', 'down', 'left', 'right', 'a', 'b']
 
+KONAMI = ('up', 'up', 'down', 'down', 'left', 'right')#, 'left', 'right', 'b', 'a', 'start']
+
 JOIN_INDEX_MAX = 6**4 # 1296
 
 MODE_STATIC = 'static'
@@ -81,6 +83,8 @@ class GameManager(ApplicationSession):
     def check_joincode(self, badge):
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
             entered = tuple(badge.buttons)
+            if entered == KONAMI:
+                self.publish(u'me.magbadge.badge.lights', 255, 0, 0)
             if entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
