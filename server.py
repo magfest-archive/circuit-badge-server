@@ -103,6 +103,7 @@ class Component(ApplicationSession):
                 self.publish(u'me.magbadge.badge.button.down', badge_id, BUTTON_NAMES[gpio_trigger])
                 self.buttons[badge_id].append(gpio_trigger)
                 if tuple(self.buttons[badge_id]) == KONAMI:
+                    print("KONAMI")
                     self.rainbow(badge_id, 5000, 32, 128, 64)
             else:
                 self.publish(u'me.magbadge.badge.button.up', badge_id, BUTTON_NAMES[gpio_trigger])
