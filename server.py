@@ -171,7 +171,7 @@ class Component(ApplicationSession):
                         print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
 
-                    self.send_button_updates(badge_id, next_state)
+                    self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
