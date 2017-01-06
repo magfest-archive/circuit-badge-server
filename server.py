@@ -137,15 +137,16 @@ class Component(ApplicationSession):
     def check_joincode(self, badge):
         print("Checking joincode")
         print(len(badge.buttons))
-        if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
+        if len(badge.buttons) >= TOTAL_JOIN:
             entered = tuple(badge.buttons)[-TOTAL_JOIN:]
+
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
                 self.game_map[badge.id] = "konami"
                 self.rainbow(badge.id, 5000, 32, 128, 64)
+                self.publish(u'me.magbadge.app.konami.user.join', badge.id)
                 print("KONAMI")
-
-            if entered in self.join_codes:
+            elif entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
                 self.game_map[badge.id] = game_id
@@ -264,13 +265,13 @@ class Component(ApplicationSession):
 
                     if gpio_trigger:
                         button = BUTTON_NAMES[gpio_trigger]
-                        if gpio_direction:
+                        if not gpio_direction:
                             badge.buttons.append(gpio_trigger)
 
                         if self.game_map[badge_id]:
                             self.send_button_updates(self.game_map[badge_id], badge, button, gpio_direction)
                         else:
-                            if gpio_direction:
+                            if not gpio_direction:
                                 self.check_joincode(badge)
                     elif not gpio_state and not self.game_map[badge_id]:
                         yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
