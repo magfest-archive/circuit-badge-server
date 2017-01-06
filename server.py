@@ -210,12 +210,12 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
                 if time.time() > next_rssi:
-                    #MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-                    #leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-                    #for i in leds:
-                     #   MESSAGE.extend(i)
+                    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
+                    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    for i in leds:
+                        MESSAGE.extend(i)
 
-                    #self.send_packet(badge_id, bytes(MESSAGE))
+                    self.send_packet(badge_id, bytes(MESSAGE))
                                 #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
                     #next_rssi = time.time() + WIFI_INTERVAL
                     #self.rssi_all(30, 45, 96)
