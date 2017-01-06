@@ -16,6 +16,7 @@ class Component(ApplicationSession):
     locations = {}
 
     def send_scan(self, badge_id, data):
+        print("Sending scan of {} APs".format(len(data["wifi-fingerprint"])))
         res = requests.post(TRACK_URL, json=data)
         if res.status_code == 200:
             body = res.json()
