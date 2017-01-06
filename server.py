@@ -198,7 +198,17 @@ class Component(ApplicationSession):
     def konami_button(self, badge_id, button):
         debug(badge_id, "konami! button " + button)
         if button == 'a':
-            yield from self.set_lights(badge_id, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0)
+            yield from self.set_lights(badge_id, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0)
+        elif button == 'b':
+            yield from self.set_lights(badge_id, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0)
+        elif button == 'up':
+            yield from self.set_lights(badge_id, 0, 0, 128, 0, 0, 128, 0, 0, 128, 0, 0, 128)
+        elif button == 'down':
+            yield from self.set_lights(badge_id, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128)
+        elif button == 'left':
+            yield from self.set_lights(badge_id, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128)
+        elif button == 'right':
+            yield from self.set_lights(badge_id, 128, 128, 0, 128, 128, 0, 128, 128, 0, 128, 128, 0)
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
