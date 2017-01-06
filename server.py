@@ -185,7 +185,7 @@ class Component(ApplicationSession):
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
-                    if not gpio_trigger:
+                    if not gpio_trigger and not gpio_state and tuple(self.buttons[badge_id]) != KONAMI:
                         print("resetting")
                         yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
