@@ -119,7 +119,7 @@ class Component(ApplicationSession):
     def expire_joincode(self, joincode):
         if joincode in self.join_codes:
             game_id, mode, mnemonic, timeout = self.join_codes[joincode]
-            self.publish(u'me.magbadge.app.' + game_id + '.join')
+            self.publish(u'me.magbadge.app.' + game_id + '.joincode.expired')
             del self.join_codes[joincode]
 
     @asyncio.coroutine
@@ -143,9 +143,7 @@ class Component(ApplicationSession):
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
                 self.game_map[badge.id] = "konami"
-                self.rainbow(badge.id, 5000, 32, 128, 64)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
-                print("KONAMI")
             elif entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
@@ -183,6 +181,11 @@ class Component(ApplicationSession):
         print("konami! button " + button)
         if button == 'a':
             self.set_lights(badge_id, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0)
+
+    @asyncio.coroutine
+    def konami_join(self, badge_id):
+        yield from asyncio.sleep(.1)
+        self.rainbow(badge_id, 5000, 32, 128, 64)
 
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_ips:
@@ -231,6 +234,7 @@ class Component(ApplicationSession):
     def onJoin(self, details):
         yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
+        yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.join')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
