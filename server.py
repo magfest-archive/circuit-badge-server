@@ -95,9 +95,9 @@ class Component(ApplicationSession):
     socket = None
 
     def send_button_updates(self, badge_id, state):
-        #print(state)b
+        print(state)
         if state.gpio_trigger:
-            #print(state.trigger_direction)
+            print(state.trigger_direction)
 
             if state.trigger_direction:
                 self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
@@ -107,7 +107,6 @@ class Component(ApplicationSession):
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_states:
             ip = self.badge_states[badge_id]
-            #print("Sending packet to ({}, {}): {}".format(ip, 8001, packet))
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
 
     def request_scan(self, badge_id):
@@ -141,7 +140,8 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def onJoin(self, details):
         if ENABLE_CONCERTS:
-            yield from self.subscribe(self.concert_lights, u'me.magbadge.concerts.lights')
+            yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
+            #yield from self.subscribe(self.concert_lights, u'me.magbadge.concerts.lights')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -221,7 +221,6 @@ class Component(ApplicationSession):
         print("Sending off scan with #{} SSIDs".format(len(self.wifi_scans[scan_id])))
         if len(self.wifi_scans[scan_id]):
             self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
-            self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         del self.wifi_scans[scan_id]
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
