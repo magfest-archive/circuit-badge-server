@@ -61,6 +61,9 @@ MODE_STATIC = 'static'
 MODE_UNIQUE = 'unique'
 MODE_SINGLE = 'single'
 
+MORSE_ON = (64,) * 12
+MORSE_OFF = (0,) * 12
+
 
 DEBUG_BADGES = (
     'A0:20:A6:07:18:96', # dylan
@@ -321,13 +324,13 @@ class Component(ApplicationSession):
         morse = ' '.join([MORSE_CODE.get(c, '') for c in text.upper()])
         for char in morse:
             if char == '.':
-                yield from self.set_lights_nogame(MORSE_ON)
+                yield from self.set_lights_nogame(*MORSE_ON)
                 yield from asyncio.sleep(MORSE_DIT)
-                yield from self.set_lights_nogame(MORSE_OFF)
+                yield from self.set_lights_nogame(*MORSE_OFF)
             elif char == '-':
-                yield from self.set_lights_nogame(MORSE_ON)
+                yield from self.set_lights_nogame(*MORSE_ON)
                 yield from asyncio.sleep(MORSE_DAH)
-                yield from self.set_lights_nogame(MORSE_OFF)
+                yield from self.set_lights_nogame(*MORSE_OFF)
             elif char == ' ':
                 yield from asyncio.sleep(MORSE_SPACE)
 
