@@ -224,7 +224,6 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
-        print("*** LIGHTS *** badge in game?", self.game_map.get(badge_id, False))
         r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4 = colors
         executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
 
