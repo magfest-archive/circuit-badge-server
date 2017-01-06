@@ -230,7 +230,7 @@ class Component(ApplicationSession):
                 break
             except:
                 traceback.print_exc()
-            yield from asyncio.sleep(.01)
+            yield from asyncio.sleep(.1)
 
     def scan_complete(self, badge_id, scan_id):
         print("Sending off scan with #{} SSIDs".format(len(self.wifi_scans[scan_id])))
