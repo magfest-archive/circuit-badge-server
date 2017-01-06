@@ -142,11 +142,12 @@ class Component(ApplicationSession):
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
                 self.rainbow(badge.id, 5000, 32, 128, 64)
+                self.game_map[badge_id] = "konami"
                 print("KONAMI")
             if entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
-                self.player_mapping[badge.id] = game_id
+                self.game_map[badge.id] = game_id
                 self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge.id)
 
                 if mode == MODE_STATIC:
@@ -159,8 +160,8 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def kick_player(self, player):
-        if player in self.player_mapping:
-            del self.player_mapping[player]
+        if player in self.game_map:
+            del self.game_map[player]
 
     def send_button_updates(self, game, badge_id, gpio_trigger, trigger_direction):
         if down:
