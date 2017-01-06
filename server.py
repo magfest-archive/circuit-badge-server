@@ -215,7 +215,7 @@ class Component(ApplicationSession):
             print("LOL NOPE CAN'T DO THAT")
 
     def request_scan(self, badge_id):
-        debug(badge.id, "Requesting scan from {}".format(badge_id))
+        debug(badge_id, "Requesting scan from {}".format(badge_id))
         self.send_packet(badge_id, b'\x04')
 
     def scan_all(self):
