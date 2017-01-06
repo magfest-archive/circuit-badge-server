@@ -11,6 +11,7 @@ import concurrent.futures
 import traceback
 import collections
 import random
+from autobahn.wamp.types import PublishOptions
 
 BUTTON_RIGHT = 1
 BUTTON_DOWN = 2
@@ -188,10 +189,10 @@ class Component(ApplicationSession):
                 self.game_map[badge.id] = None
             else:
                 debug(badge.id, "[ " + game + " ] Button " + button + " pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button, options={'exclude_me': False})
+                self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button, options=PublishOptions(exclude_me=False))
         else:
             debug(badge.id, "Button " + button + " released")
-            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button, options={'exclude_me': False})
+            self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button, options=PublishOptions(exclude_me=False))
 
     @asyncio.coroutine
     def konami_button(self, badge_id, button):
