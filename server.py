@@ -40,7 +40,7 @@ CONFIGURE = 8
 DEEP_SLEEP = 9
 
 SCAN_INTERVAL = 600
-WIFI_INTERVAL = 1
+WIFI_INTERVAL = 10000
 
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
 
@@ -210,17 +210,16 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
                 if time.time() > next_rssi:
-                    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-                    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-                    for i in leds:
-                        MESSAGE.extend(i)
+                    #MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
+                    #leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    #for i in leds:
+                     #   MESSAGE.extend(i)
 
-                    self.send_packet(badge_id, bytes(MESSAGE))
+                    #self.send_packet(badge_id, bytes(MESSAGE))
                                 #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-                    next_rssi = time.time() + WIFI_INTERVAL
+                    #next_rssi = time.time() + WIFI_INTERVAL
                     #self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
-
                 break
             except:
                 traceback.print_exc()
