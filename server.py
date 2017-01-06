@@ -97,9 +97,9 @@ class Component(ApplicationSession):
 
             if trigger_direction:
                 print(BUTTON_NAMES[gpio_trigger] + " down")
-                self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
+                self.publish(u'me.magbadge.badge.button.down', badge_id, BUTTON_NAMES[gpio_trigger])
             else:
-                self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
+                self.publish(u'me.magbadge.badge.button.up', badge_id, BUTTON_NAMES[gpio_trigger])
 
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_states:
@@ -223,7 +223,7 @@ class Component(ApplicationSession):
     def scan_complete(self, badge_id, scan_id):
         print("Sending off scan with #{} SSIDs".format(len(self.wifi_scans[scan_id])))
         if len(self.wifi_scans[scan_id]):
-            self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
+            self.publish(u'me.magbadge.badge.scan', badge_id, [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
         del self.wifi_scans[scan_id]
 
 runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
