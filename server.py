@@ -168,6 +168,7 @@ class Component(ApplicationSession):
                 yield from self.rainbow(badge.id)
                 debug(badge.id, "dane rainbowing")
                 debug(badge.id, "publishing konami join")
+                self.konami.players.add(badge.id)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
                 debug(badge.id, "done konami join")
             elif entered in self.join_codes:
