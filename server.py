@@ -94,15 +94,14 @@ class Component(ApplicationSession):
     badge_states = {}
     socket = None
 
-    def send_button_updates(self, badge_id, state):
-        print(state)
-        if state.gpio_trigger:
-            print(state.trigger_direction)
+    def send_button_updates(self, badge_id, gpio_trigger, gpio_direction):
+        if gpio_trigger:
+            print(trigger_direction)
 
-            if state.trigger_direction:
-                self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
+            if trigger_direction:
+                self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
             else:
-                self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[state.gpio_trigger])
+                self.publish(u'me.magbadge.badge.button.up', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
 
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_states:
@@ -166,14 +165,13 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     #print("Got status update: ".format(packet))
-                    next_state = BadgeState.from_bytes(packet)
-                    next_state.ip = ip
+                    gpio_trigger, gpio_direction = packet[8], packet[9]
 
                     if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
                         print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
 
-                    self.send_button_updates(badge_id, ip)
+                    self.send_button_updates(badge_id, next_state)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
                     print("Got wifi reply: ".format(packet))
