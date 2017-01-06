@@ -122,6 +122,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
+        print("Setting lights!")
         executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, ) + (g, r, b) * 4))
 
     @asyncio.coroutine
