@@ -96,7 +96,6 @@ class Component(ApplicationSession):
 
     def send_button_updates(self, badge_id, gpio_trigger, trigger_direction):
         if gpio_trigger:
-            print(trigger_direction)
 
             if trigger_direction:
                 self.publish(u'me.magbadge.badge.button.down', format_mac(badge_id), BUTTON_NAMES[gpio_trigger])
@@ -117,7 +116,6 @@ class Component(ApplicationSession):
             self.request_scan(badge_id)
 
     def send_packet_all(self, packet):
-        #print("sending", packet)
         for badge_id in set(self.badge_states.keys()):
             self.send_packet(badge_id, packet)
 
@@ -171,6 +169,7 @@ class Component(ApplicationSession):
                         #print("{} clients".format(len(self.badge_states)))
                         self.badge_states[badge_id] = ip
 
+                    print(badge_id, gpio_trigger, gpio_direction)
                     self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
                 elif msg_type == WIFI_UPDATE_REPLY and False:
