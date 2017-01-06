@@ -134,6 +134,7 @@ class Component(ApplicationSession):
         game_id, mode, mnemonic, timeout = self.join_codes[joincode]
         self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge_id, mnemonic)
 
+    @asyncio.coroutine
     def check_joincode(self, badge):
         print("Checking joincode")
         print(len(badge.buttons))
@@ -143,6 +144,7 @@ class Component(ApplicationSession):
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
                 self.game_map[badge.id] = "konami"
+                yield from self.rainbow(badge.id)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
             elif entered in self.join_codes:
                 print("Joincode entered!")
@@ -279,7 +281,7 @@ class Component(ApplicationSession):
                             self.send_button_updates(self.game_map[badge_id], badge, button, gpio_direction)
                         else:
                             if not gpio_direction:
-                                self.check_joincode(badge)
+                                yield from self.check_joincode(badge)
                     elif not gpio_state and not self.game_map[badge_id]:
                         yield from self.set_lights(badge_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
