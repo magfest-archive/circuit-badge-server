@@ -317,7 +317,7 @@ class Component(ApplicationSession):
     def set_lights_nogame(self, *args):
         for badge in self.badges:
             if not self.game_map[badge]:
-                self.set_lights(badge, *args)
+                yield from self.set_lights(badge, *args)
 
     @asyncio.coroutine
     def morse_code(self, text):
