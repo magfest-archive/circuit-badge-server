@@ -250,6 +250,8 @@ class Component(ApplicationSession):
                     self.badges[badge_id] = Badge(badge_id)
                     self.game_map[badge_id] = None
 
+                badge = self.badges[badge_id]
+
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
 
