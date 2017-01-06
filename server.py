@@ -192,8 +192,10 @@ class Component(ApplicationSession):
                     next_state.ip = ip
 
                     if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
+                        if badge_id not in self.badge_states:
+                            print("{} clients".format(len(self.badge_states)))
+
                         self.badge_states[badge_id] = next_state
-                        print("{} clients".format(len(self.badge_states)))
 
                     self.send_button_updates(badge_id, next_state)
 
@@ -239,6 +241,7 @@ class Component(ApplicationSession):
             yield from asyncio.sleep(.1)
 
     def scan_complete(self, badge_id, scan_id):
+        print("Sending off scan with #{} SSIDs".format(len(self.wifi_scans[scan_id])))
         if len(self.wifi_scans[scan_id]):
             self.publish(u'me.magbadge.badge.scan', format_mac(badge_id), [{"mac": format_mac(mac), "rssi": rssi} for mac, rssi in self.wifi_scans[scan_id]])
         del self.wifi_scans[scan_id]
