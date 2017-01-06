@@ -40,7 +40,7 @@ CONFIGURE = 8
 DEEP_SLEEP = 9
 
 SCAN_INTERVAL = 600
-WIFI_INTERVAL = 10000
+WIFI_INTERVAL = 1
 
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
 
