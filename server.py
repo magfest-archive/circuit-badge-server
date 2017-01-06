@@ -184,7 +184,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
-        yield from asyncio.sleep(.1)
+        yield from asyncio.sleep(.02)
         self.rainbow(badge_id, 5000, 32, 128, 64)
 
     def send_packet(self, badge_id, packet):
