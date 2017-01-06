@@ -84,8 +84,8 @@ class GameManager(ApplicationSession):
     def check_joincode(self, badge):
         print(len(badge.buttons))
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
-            entered = tuple(badge.buttons[-TOTAL_JOIN:])
-            if tuple(badge.buttons[-len(KONAMI):]) == KONAMI:
+            entered = tuple(badge.buttons)[-TOTAL_JOIN:]
+            if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 self.publish(u'me.magbadge.badge.lights', 255, 0, 0)
                 print("KONAMI")
             if entered in self.join_codes:
@@ -129,7 +129,7 @@ class GameManager(ApplicationSession):
             badge.buttons.append(button)
 
             if badge_id in self.player_mapping:
-                if len(badge.buttons) and tuple(badge.buttons[-3:]) == EXIT_SEQUENCE:
+                if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                     print("Exit sequence pressed")
                     self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.leave', badge_id)
                     del self.player_mapping[badge_id]
