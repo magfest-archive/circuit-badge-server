@@ -22,6 +22,7 @@ class Component(ApplicationSession):
             if body.get("success", False):
                 self.publish(u'me.magbadge.badge.location', badge_id, body.get("location", None))
                 self.locations[badge_id] = body.get("location", None)
+                print("Badge {} is in {}".format(badge_id, body.get("location")))
             else:
                 print("[ERROR] /track returned unsuccessful result, message is: {}".format(body.get("message", "<none present>")))
         else:
