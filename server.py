@@ -161,7 +161,7 @@ class Component(ApplicationSession):
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
                 debug(badge.id, "done konami join")
             elif entered in self.join_codes:
-                print("Joincode entered!")
+                debug(badge.id, "Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
                 self.game_map[badge.id] = game_id
                 self.publish(u'me.magbadge.app.' + game_id + '.user.join', badge.id)
@@ -182,25 +182,25 @@ class Component(ApplicationSession):
     def send_button_updates(self, game, badge, button, down):
         if down:
             if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
-                print("Exit sequence pressed")
+                debug(badge.id, "Exit sequence pressed")
                 self.publish(u'me.magbadge.app.' + game + '.user.leave', badge.id)
                 self.game_map[badge.id] = None
             else:
-                print("[ " + game + " ] Button " + button + " pressed")
+                debug(badge.id, "[ " + game + " ] Button " + button + " pressed")
                 self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button)
         else:
-            print("Button " + button + " released")
+            debug(badge.id, "Button " + button + " released")
             self.publish(u'me.magbadge.app.' + game + '.user.button.up', badge.id, button)
 
     @asyncio.coroutine
     def konami_button(self, badge_id, button):
-        print("konami! button " + button)
+        debug(badge_id, "konami! button " + button)
         if button == 'a':
             yield from self.set_lights(badge_id, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0)
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
-        print("rainbowing")
+        debug(badge_id, "rainbowing")
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
 
     def send_packet(self, badge_id, packet):
@@ -215,7 +215,7 @@ class Component(ApplicationSession):
             print("LOL NOPE CAN'T DO THAT")
 
     def request_scan(self, badge_id):
-        print("Requesting scan from {}".format(badge_id))
+        debug(badge.id, "Requesting scan from {}".format(badge_id))
         self.send_packet(badge_id, b'\x04')
 
     def scan_all(self):
@@ -228,7 +228,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
-        print("RAINBOW " + badge_id)
+        debug(badge_id, "RAINBOW " + badge_id)
         executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
     @asyncio.coroutine
@@ -238,7 +238,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
-        print("Setting lights!")
+        debug(badge_id, "Setting lights!")
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
         #executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
 
@@ -281,7 +281,8 @@ class Component(ApplicationSession):
                 packet = data[7:]
 
                 if badge_id not in self.badge_ips:
-                    print("{} clients".format(len(self.badge_ips)))
+                    if not len(self.badge_ips) % 10:
+                        print("{} clients".format(len(self.badge_ips)))
                     self.badge_ips[badge_id] = ip
                     self.badges[badge_id] = Badge(badge_id)
                     self.game_map[badge_id] = None
@@ -330,16 +331,6 @@ class Component(ApplicationSession):
                         self.scan_all()
                     except:
                         traceback.print_exc()
-                if time.time() > next_rssi:
-                    MESSAGE = [LED_CONTROL, 0x0, 0x00, 0, ]
-                    leds = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-                    for i in leds:
-                        MESSAGE.extend(i)
-
-                    self.send_packet(badge_id, bytes(MESSAGE))
-                                #b"\x00\x00\x00" + struct.pack("bbbbbbbbbbbb", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-                    #next_rssi = time.time() + WIFI_INTERVAL
-                    #self.rssi_all(30, 45, 96)
             except KeyboardInterrupt:
                 break
             except:
