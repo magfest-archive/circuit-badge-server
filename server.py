@@ -123,13 +123,12 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
         print("Setting lights!")
-        self.rssi(badge_id)
-        #executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, ) + (g, r, b) * 4))
+        executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
 
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
         r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4 = colors
-        self.send_packet(badge_id, bytes((LED_CONTROL, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
+        self.send_packet(badge_id, bytes((LED_CONTROL, 0, 0, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
 
     def rssi(self, badge_id, min=30, max=45, intensity=96):
         self.send_packet(badge_id, struct.pack('BbbB', LED_RSSI_MODE, min, max, intensity))
