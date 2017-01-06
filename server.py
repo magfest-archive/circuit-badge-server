@@ -120,18 +120,18 @@ class Component(ApplicationSession):
         for badge_id in set(self.badge_states.keys()):
             self.send_packet(badge_id, packet)
 
-    @asyncio.coroutine
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
-        executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
+        self.send_packet(badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
-    @asyncio.coroutine
     def rainbow_all(self, *args, **kwargs):
         for badge_id in set(self.badge_states.keys()):
-            yield from self.rainbow(badge_id, *args, **kwargs)
+            self.rainbow(badge_id, *args, **kwargs)
 
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
-        executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
+        print("Setting lights!")
+        self.rainbow(badge_id, 5000, 32, 128, 64)
+        #executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
 
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
@@ -147,7 +147,6 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def onJoin(self, details):
         yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
-        yield from self.subscribe(self.rainbow, u'me.magbadge.badge.rainbow')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
