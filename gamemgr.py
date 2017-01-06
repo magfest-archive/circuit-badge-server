@@ -120,10 +120,14 @@ class GameManager(ApplicationSession):
         #   - if they entered the exit sequence, kick them
         #   - otherwise, relay the
         if badge_id in self.player_mapping:
-            if down:
+            if badge_id not in self.badges:
+                badge = self.badges[badge_id] = Badge(badge_id)
+            else:
                 badge = self.badges[badge_id]
-                badge.buttons.append(button)
 
+            badge.buttons.append(button)
+
+            if down:
                 if len(badge.buttons) and tuple(badge.buttons[-3:]) == EXIT_SEQUENCE:
                     print("Exit sequence pressed")
                     self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.leave', badge_id)
