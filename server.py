@@ -66,6 +66,29 @@ DEBUG_BADGES = (
     'A0:20:A6:07:18:96', # dylan
 )
 
+MORSE_CODE = {
+    'A': '.-', 'B': '-...', 'C': '-.-.',
+    'D': '-..', 'E': '.', 'F': '..-.',
+    'G': '--.', 'H': '....', 'I': '..',
+    'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---',
+    'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...', 'T': '-', 'U': '..-',
+    'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..',
+
+    '0': '-----', '1': '.----', '2': '..---',
+    '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..',
+    '9': '----.'
+}
+
+MORSE_ELEMENT = .092
+MORSE_DIT = MORSE_ELEMENT * 1
+MORSE_DAH = MORSE_ELEMENT * 3
+MORSE_CHAR = MORSE_ELEMENT * 1
+MORSE_SPACE = MORSE_ELEMENT * 7
+
 
 def debug(badge_id, *strs):
     if badge_id in DEBUG_BADGES:
@@ -288,10 +311,35 @@ class Component(ApplicationSession):
         self.send_packet_all(b"\x03" + struct.pack('bbB', min, max, intensity))
 
     @asyncio.coroutine
+    def set_lights_nogame(self, *args):
+        for badge in self.badges:
+            if not self.game_map[badge]:
+                self.set_lights(badge, *args)
+
+    @asyncio.coroutine
+    def morse_code(self, text):
+        morse = ' '.join([MORSE_CODE.get(c, '') for c in text.upper()])
+        for char in morse:
+            if char == '.':
+                yield from self.set_lights_nogame(MORSE_ON)
+                yield from asyncio.sleep(MORSE_DIT)
+                yield from self.set_lights_nogame(MORSE_OFF)
+            elif char == '-':
+                yield from self.set_lights_nogame(MORSE_ON)
+                yield from asyncio.sleep(MORSE_DAH)
+                yield from self.set_lights_nogame(MORSE_OFF)
+            elif char == ' ':
+                yield from asyncio.sleep(MORSE_SPACE)
+
+            if char != ' ':
+                yield from asyncio.sleep(MORSE_CHAR)
+
+    @asyncio.coroutine
     def onJoin(self, details):
         yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
         yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
+        yield from self.subscribe(self.morse_code, u'me.magbadge.idle.morse_code')
 
         try:
             with open('state.json') as f:
@@ -300,6 +348,8 @@ class Component(ApplicationSession):
                 self.badge_ips = res.get('badge_ips', {})
                 self.game_map = res.get('game_map', {})
                 self.konami.players = set(res.get('konami_players', []))
+
+            print("Pre-loaded {} players".format(len(self.badge_ips)))
         except OSError:
             pass
 
