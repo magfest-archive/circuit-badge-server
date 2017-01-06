@@ -122,7 +122,7 @@ class Component(ApplicationSession):
             self.send_packet(badge_id, packet)
 
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
-        self.send_packet(badge_id, struct.pack(">BHBBB", LED_RAINBOW_MODES, runtime, speed, intensity, offset))
+        self.send_packet(badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
     def rainbow_all(self, badge_id, *args, **kwargs):
         for badge_id in set(self.badge_states.keys()):
