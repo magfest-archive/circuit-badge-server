@@ -259,7 +259,7 @@ class Component(ApplicationSession):
         debug(badge_id, "rainbowing")
         self.konami.add_player(badge_id)
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
-        yield from asyncio.sleep(2)
+        #yield from asyncio.sleep(2)
         yield from self.set_lights(badge_id, *(self.konami.color * 4))
 
     def send_packet(self, badge_id, packet):
