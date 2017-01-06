@@ -315,7 +315,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def set_lights_nogame(self, *args):
-        for badge in self.badges:
+        for badge in DEBUG_BADGES:
             if not self.game_map[badge]:
                 yield from self.set_lights(badge, *args)
 
@@ -346,6 +346,7 @@ class Component(ApplicationSession):
         yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
         yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
+        yield from self.subscrube(self.set_lights_nogame, u'me.magbadge.idle.lights')
         yield from self.subscribe(self.morse_code, u'me.magbadge.idle.morse_code')
 
         try:
