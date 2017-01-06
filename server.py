@@ -141,9 +141,10 @@ class Component(ApplicationSession):
             entered = tuple(badge.buttons)[-TOTAL_JOIN:]
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
                 print("KONAMI")
-                self.rainbow(badge.id, 5000, 32, 128, 64)
                 self.game_map[badge.id] = "konami"
+                self.rainbow(badge.id, 5000, 32, 128, 64)
                 print("KONAMI")
+
             if entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
@@ -170,7 +171,7 @@ class Component(ApplicationSession):
                 self.publish(u'me.magbadge.app.' + game + '.user.leave', badge.id)
                 self.game_map[badge.id] = None
             else:
-                print("Button " + button + " pressed")
+                print("[ " + game + " ] Button " + button + " pressed")
                 self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button)
         else:
             print("Button " + button + " released")
