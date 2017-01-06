@@ -39,6 +39,8 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 90
 WIFI_INTERVAL = 10000
 
+ENABLE_CONCERTS = False
+
 import concurrent.futures
 
 import traceback
@@ -162,7 +164,8 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def onJoin(self, details):
-        yield from self.subscribe(self.concert_lights, u'me.magbadge.concerts.lights')
+        if ENABLE_CONCERTS:
+            yield from self.subscribe(self.concert_lights, u'me.magbadge.concerts.lights')
 
         counter = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
