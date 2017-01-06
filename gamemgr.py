@@ -14,8 +14,9 @@ JOIN_PREFIX = ('start', 'select')
 # Not including prefix
 JOIN_LENGTH = 4
 JOIN_KEYS = ['up', 'down', 'left', 'right', 'a', 'b']
+TOTAL_JOIN = JOIN_LENGTH + len(JOIN_PREFIX)
 
-KONAMI = ('up', 'up', 'down', 'down', 'left', 'right')#, 'left', 'right', 'b', 'a', 'start']
+KONAMI = ('up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a', 'start')
 
 JOIN_INDEX_MAX = 6**4 # 1296
 
@@ -82,9 +83,10 @@ class GameManager(ApplicationSession):
 
     def check_joincode(self, badge):
         if len(badge.buttons) >= len(JOIN_PREFIX)+JOIN_LENGTH:
-            entered = tuple(badge.buttons)
-            if entered == KONAMI:
+            entered = tuple(badge.buttons[-TOTAL_JOIN:])
+            if tuple(badge.buttons[-len(KONAMI):]) == KONAMI:
                 self.publish(u'me.magbadge.badge.lights', 255, 0, 0)
+                print("KONAMI")
             if entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
