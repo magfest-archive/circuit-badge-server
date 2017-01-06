@@ -296,9 +296,10 @@ class Component(ApplicationSession):
         try:
             with open('state.json') as f:
                 res = json.load(f)
-                self.badge_map = res.get('badge_map', {})
+                self.join_codes = res.get('join_codes', {})
                 self.badge_ips = res.get('badge_ips', {})
                 self.game_map = res.get('game_map', {})
+                self.konami.players = set(res.get('konami_players', []))
         except OSError:
             pass
 
@@ -381,6 +382,7 @@ class Component(ApplicationSession):
                         'badge_ips': self.badge_ips,
                         'join_codes': self.join_codes,
                         'game_map': self.game_map,
+                        'konami_players': list(self.konami.players)
                     }, f)
                 break
             except:
