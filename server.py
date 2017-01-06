@@ -227,6 +227,7 @@ class Component(ApplicationSession):
     @asyncio.coroutine
     def konami_join(self, badge_id):
         debug(badge_id, "rainbowing")
+        self.konami.add_player(badge_id)
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
 
     def send_packet(self, badge_id, packet):
