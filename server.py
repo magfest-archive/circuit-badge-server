@@ -212,7 +212,7 @@ class Component(ApplicationSession):
                     if scan_len:
                         for i in range(scan_len):
                             self.wifi_scans[scan_id].append((packet[5+8*i:11+8*i], packet[12+8*i]-128))
-                    else:
+                    if scan_len == 0 or scan_len <= 47:
                         if scan_id in self.wifi_scans:
                             self.scan_complete(badge_id, scan_id)
                         else:
