@@ -170,17 +170,12 @@ class Component(ApplicationSession):
                 msg_type = data[6]
                 packet = data[7:]
 
+                if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
+                    #print("{} clients".format(len(self.badge_states)))
+                    self.badge_states[badge_id] = ip
+
                 if msg_type == STATUS_UPDATE:
-                    #print("Got status update: ".format(packet))
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
-
-                    if badge_id not in self.badge_states:# or next_state.newer_than(self.badge_states[badge_id]):
-                        #print("{} clients".format(len(self.badge_states)))
-                        self.badge_states[badge_id] = ip
-
-                    #self.socket.sendto(b'\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\xff\x00\xff', (ip, 8001))
-
-                    #self.rainbow(badge_id)
 
                     self.send_button_updates(badge_id, gpio_trigger, gpio_direction)
 
