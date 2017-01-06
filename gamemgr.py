@@ -120,15 +120,15 @@ class GameManager(ApplicationSession):
         #   - record the button
         #   - if they entered the exit sequence, kick them
         #   - otherwise, relay the
-        if badge_id in self.player_mapping:
-            if badge_id not in self.badges:
-                badge = self.badges[badge_id] = Badge(badge_id)
-            else:
-                badge = self.badges[badge_id]
+        if badge_id not in self.badges:
+            badge = self.badges[badge_id] = Badge(badge_id)
+        else:
+            badge = self.badges[badge_id]
 
+        if down:
             badge.buttons.append(button)
 
-            if down:
+            if badge_id in self.player_mapping:
                 if len(badge.buttons) and tuple(badge.buttons[-3:]) == EXIT_SEQUENCE:
                     print("Exit sequence pressed")
                     self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.leave', badge_id)
@@ -141,8 +141,7 @@ class GameManager(ApplicationSession):
                 print("Button " + button + " released")
                 self.publish(u'me.magbadge.app.' + self.player_mapping[badge_id] + '.user.button.up', badge_id, button)
         else:
-            if down:
-                self.check_joincode(self.badges[badge_id])
+            self.check_joincode(self.badges[badge_id])
 
     @asyncio.coroutine
     def kick_player(self, player):
