@@ -193,7 +193,8 @@ class Component(ApplicationSession):
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_ips:
             ip = self.badge_ips[badge_id]
-            self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
+            for _ in range(3):
+                self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
         else:
             print("LOL NOPE CAN'T DO THAT")
 
