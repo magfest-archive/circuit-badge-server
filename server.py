@@ -60,6 +60,16 @@ MODE_UNIQUE = 'unique'
 MODE_SINGLE = 'single'
 
 
+DEBUG_BADGES = (
+    'A0:20:A6:07:18:96', # dylan
+)
+
+
+def debug(badge_id, *strs):
+    if badge_id in DEBUG_BADGES:
+        print(*strs)
+
+
 def convert_joincode(seq):
     res = []
     for i in range(JOIN_LENGTH):
@@ -137,16 +147,19 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def check_joincode(self, badge):
-        print("Checking joincode")
-        print(len(badge.buttons))
+        debug(badge.id, "check_joincode()")
         if len(badge.buttons) >= TOTAL_JOIN:
             entered = tuple(badge.buttons)[-TOTAL_JOIN:]
 
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
-                print("KONAMI")
+                debug(badge.id, "KONAMI was entered")
                 self.game_map[badge.id] = "konami"
+                debug(badge.id, "added to game map")
                 yield from self.rainbow(badge.id)
+                debug(badge.id, "dane rainbowing")
+                debug(badge.id, "publishing konami join")
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
+                debug(badge.id, "done konami join")
             elif entered in self.join_codes:
                 print("Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
