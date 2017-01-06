@@ -265,7 +265,7 @@ class Component(ApplicationSession):
         sock.bind(('0.0.0.0', 8000))
 
         next_scan = time.time() - 1
-        next_rssi = time.time() - 1
+        next_rssi = time.time() + 10000
 
         our_ip = socket.gethostbyname_ex(socket.gethostname())[2]
 
