@@ -16,7 +16,7 @@ JOIN_LENGTH = 4
 JOIN_KEYS = ['up', 'down', 'left', 'right', 'a', 'b']
 TOTAL_JOIN = JOIN_LENGTH + len(JOIN_PREFIX)
 
-KONAMI = ('select', 'select', 'start', 'start')#'('up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a', 'start')
+KONAMI = ('up', 'up', 'down', 'down', 'left', 'right', 'left', 'right')
 
 JOIN_INDEX_MAX = 6**4 # 1296
 
