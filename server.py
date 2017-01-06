@@ -36,7 +36,7 @@ LED_RAINBOW_MODES = 7
 CONFIGURE = 8
 DEEP_SLEEP = 9
 
-SCAN_INTERVAL = 90
+SCAN_INTERVAL = 30
 WIFI_INTERVAL = 10000
 
 ENABLE_CONCERTS = False
@@ -193,6 +193,7 @@ class Component(ApplicationSession):
 
                     if badge_id not in self.badge_states or next_state.newer_than(self.badge_states[badge_id]):
                         self.badge_states[badge_id] = next_state
+                        print("{} clients".format(len(self.badge_states)))
 
                     self.send_button_updates(badge_id, next_state)
 
