@@ -61,6 +61,9 @@ JOIN_INDEX_MAX = 6**4 # 1296
 MODE_STATIC = 'static'
 MODE_UNIQUE = 'unique'
 MODE_SINGLE = 'single'
+
+DEBUG_BADGES = (,)
+
 def debug(badge_id, *strs):
     if badge_id in DEBUG_BADGES:
         print(*strs)
