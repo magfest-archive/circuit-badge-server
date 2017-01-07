@@ -366,6 +366,7 @@ class Component(ApplicationSession):
         except OSError:
             pass
 
+        next_scan = time.time() + SCAN_INTERVAL
         threading.Thread(target=self.udp_thread, daemon=True).start()
 
         while True:
