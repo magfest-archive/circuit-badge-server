@@ -459,6 +459,7 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
             except KeyboardInterrupt:
+                print("DO NOT KILL, WRITING...")
                 with open('state.json', 'w') as f:
                     json.dump({
                         'badge_ips': self.badge_ips,
@@ -466,6 +467,7 @@ class Component(ApplicationSession):
                         'game_map': self.game_map,
                         'konami_players': list(self.konami.players)
                     }, f)
+                print("DONE!")
                 break
             except:
                 traceback.print_exc()
