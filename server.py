@@ -237,7 +237,6 @@ class Component(ApplicationSession):
             else:
                 debug(badge.id, "[ " + game + " ] Button " + button + " pressed")
                 self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button, options=PublishOptions(exclude_me=False))
-                executor.submit(self.send_packet, badge.id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, 50, 128, 128, 0))
 
         else:
             debug(badge.id, "Button " + button + " released")
@@ -408,6 +407,9 @@ class Component(ApplicationSession):
                         else:
                             if not gpio_direction:
                                 yield from self.check_joincode(badge)
+                            else:
+                                yield from self.rainbow(badge_id, 50, 128, 128, 0)
+
                     elif not gpio_state and not self.game_map[badge_id]:
                         debug(badge_id, 'no gpio received and game map is', self.game_map[badge_id])
                         yield from self.set_lights(badge_id, *self.default_color)
