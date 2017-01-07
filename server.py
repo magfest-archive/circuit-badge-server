@@ -344,7 +344,7 @@ class Component(ApplicationSession):
         with open('state.json', 'w') as f:
             json.dump({
                 'badge_ips': self.badge_ips,
-                'join_codes': self.join_codes,
+                'join_codes': list(self.join_codes.items()),
                 'game_map': self.game_map,
                 'konami_players': list(self.konami.players)
             }, f)
@@ -384,7 +384,7 @@ class Component(ApplicationSession):
         try:
             with open('state.json') as f:
                 res = json.load(f)
-                self.join_codes = res.get('join_codes', {})
+                self.join_codes = dict(res.get('join_codes', {}))
                 self.badge_ips = res.get('badge_ips', {})
                 self.game_map = res.get('game_map', {})
                 self.konami.players = set(res.get('konami_players', []))
