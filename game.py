@@ -112,3 +112,6 @@ class ExampleGame(ApplicationSession):
                 player.move(0, 1)
             elif button == BUTTON_DOWN:
                 player.move(0, -1)
+
+runner = ApplicationRunner(u"ws://badges.magevent.net:8080/ws", u"MAGBadges",)
+runner.run(ExampleGame)

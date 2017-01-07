@@ -365,6 +365,7 @@ class Component(ApplicationSession):
         yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
         yield from self.subscribe(self.set_lights_nogame, u'me.magbadge.idle.lights')
         yield from self.subscribe(self.morse_code, u'me.magbadge.idle.morse_code')
+        yield from self.subscribe(self.request_joincode, u'me.magbadge.joincode.request')
 
         try:
             with open('state.json') as f:
