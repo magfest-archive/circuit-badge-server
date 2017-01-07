@@ -158,6 +158,7 @@ class Konami:
         self.colors.extend((255, 255, 0))
         self.colors.extend((0, 255, 0))
         self.colors.extend((0, 0, 255))
+        self.mode = True
 
     def add_player(self, badge_id):
         self.players.add(badge_id)
@@ -272,9 +273,12 @@ class Component(ApplicationSession):
             yield from self.set_lights(sender, *((0,) * 12))
             yield from self.kick_player(sender)
         elif button == 'select':
-            pass
+            self.konami.mode = not self.konami.mode
         else:
-            self.konami.colors.extend(Konami.COLOR_MAP[button])
+            if self.konami.mode:
+                self.konami.colors.extend(Konami.COLOR_MAP[button])
+            else:
+                self.konami.colors.extendleft(Konami.COLOR_MAP[button])
             for badge_id in set(self.konami.players):
                 yield from self.set_lights(badge_id, *tuple(self.konami.colors))
 
