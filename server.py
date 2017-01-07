@@ -202,8 +202,8 @@ class Component(ApplicationSession):
         if timeout != 0:
             asyncio.get_event_loop().call_later(timeout, self.expire_joincode, (code,))
         self.join_codes[code] = game_id, MODE_UNIQUE, mnemonic, timeout
-        self.publish(u'me.magbadge.app.' + game_id + '.joincode.updated', joincode)
-        return joincode
+        self.publish(u'me.magbadge.app.' + game_id + '.joincode.updated', code)
+        return code
 
     def on_joincode(self, badge_id, joincode):
         game_id, mode, mnemonic, timeout = self.join_codes[joincode]
