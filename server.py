@@ -14,6 +14,7 @@ import random
 from autobahn.wamp.types import PublishOptions
 import json
 import threading
+import queue
 
 BUTTON_RIGHT = 1
 BUTTON_DOWN = 2
@@ -139,6 +140,22 @@ class Badge:
 
 def format_mac(mac):
     return ':'.join(('%02X' % d for d in mac))
+
+
+PACKET_LOG = queue.Queue()
+
+
+def log_packet_thread():
+    try:
+        with open("packets.log", "a") as logfile:
+            while True:
+                pkt = PACKET_LOG.get()
+                logfile.write(",".join((str(f) for f in pkt)))
+    except InterruptedError:
+        print("Interrupted, stopping logger")
+        return
+    except:
+        traceback.print_exc()
 
 
 class Konami:
@@ -408,6 +425,7 @@ class Component(ApplicationSession):
 
         threading.Thread(target=self.ping_all_the_things, daemon=True).start()
         threading.Thread(target=self.save_thread, daemon=True).start()
+        threading.Thread(target=log_packet_thread(), daemon=True).start()
 
         self.socket = sock
         while True:
@@ -421,7 +439,6 @@ class Component(ApplicationSession):
                 packet = data[7:]
                 status_count = int.from_bytes(packet[14:16], 'big') # update_id
 
-                debug(badge_id, "STATUS: ", status_count)
 
                 if badge_id not in self.badge_ips:
                     if not len(self.badge_ips) % 10:
@@ -436,6 +453,7 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
+                    PACKET_LOG.put_nowait(struct.unpack(">6sBb6sBBBBHHHBI", data))
 
                     if gpio_trigger:
                         button = BUTTON_NAMES[gpio_trigger]
