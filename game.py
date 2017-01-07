@@ -61,7 +61,7 @@ class ExampleGame(ApplicationSession):
         yield from self.register(self.player_join, u'me.magbadge.app.example.user.join')
         yield from self.register(self.player_leave, u'me.magbadge.app.example.user.leave')
         yield from self.register(self.button_down, u'me.magbadge.app.example.user.button.down')
-        self.publish(u'me.magbadge.joincode.request', 'example')
+        self.joincode(yield from self.call(u'me.magbadge.joincode.request', 'example'))
 
     def get_player(self, badge):
         return self.badge_map.get(badge, None)
