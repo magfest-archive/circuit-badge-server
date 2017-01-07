@@ -386,6 +386,8 @@ class Component(ApplicationSession):
 
         our_ip = socket.gethostbyname_ex(socket.gethostname())[2]
 
+        threading.Thread(target=self.ping_all_the_things, daemon=True).start()
+
         self.socket = sock
         while True:
             try:
