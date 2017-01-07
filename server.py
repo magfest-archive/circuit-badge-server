@@ -453,7 +453,7 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
-                    PACKET_LOG.put_nowait(struct.unpack(">6sBb6sBBBBHHHBI", data))
+                    PACKET_LOG.put_nowait(struct.unpack(">6sBxb6sBBBBHHHBxI", data))
 
                     if gpio_trigger:
                         button = BUTTON_NAMES[gpio_trigger]
