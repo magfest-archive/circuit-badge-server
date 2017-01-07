@@ -408,7 +408,7 @@ class Component(ApplicationSession):
                             if not gpio_direction:
                                 yield from self.check_joincode(badge)
                             else:
-                                yield from self.rainbow(badge_id, 50, 128, 128, 0)
+                                yield from self.rainbow(badge_id, 50, 32, 128, 0)
 
                     elif not gpio_state and not self.game_map[badge_id]:
                         debug(badge_id, 'no gpio received and game map is', self.game_map[badge_id])
