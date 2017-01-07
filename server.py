@@ -289,7 +289,7 @@ class Component(ApplicationSession):
             self.send_packet(badge_id, packet)
 
     @asyncio.coroutine
-    def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
+    def rainbow(self, badge_id, runtime=1000, speed=128, intensity=32, offset=0):
         debug(badge_id, "RAINBOW " + badge_id)
         executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
