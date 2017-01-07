@@ -186,6 +186,7 @@ class Component(ApplicationSession):
     def generate_joincode(self):
         res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
         self._join_index += 1
+        print("Generated joincode", res)
         return res
 
     def expire_joincode(self, joincode):
@@ -196,6 +197,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def request_joincode(self, game_id, mode='static', mnemonic='', timeout=120):
+        print("Got joincode request from game", game_id, "mode=", mode, "mem", mnemonic, "timeout", timeout)
         code = self.generate_joincode()
         if timeout != 0:
             asyncio.get_event_loop().call_later(timeout, self.expire_joincode, (code,))
