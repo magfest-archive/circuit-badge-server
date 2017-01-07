@@ -150,7 +150,7 @@ def log_packet_thread():
         with open("packets.log", "a") as logfile:
             while True:
                 pkt = PACKET_LOG.get()
-                logfile.write(",".join((str(f) for f in pkt)))
+                logfile.write(",".join((str(f) for f in pkt)) + '\n')
     except InterruptedError:
         print("Interrupted, stopping logger")
         return
@@ -453,7 +453,7 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
-                    PACKET_LOG.put_nowait(struct.unpack(">6sBxb6sBBBBHHHBxI", data))
+                    PACKET_LOG.put_nowait(struct.unpack(">6sBxb6sBBBBHHHBxI", data[:31]))
 
                     if gpio_trigger:
                         button = BUTTON_NAMES[gpio_trigger]
