@@ -363,7 +363,7 @@ class Component(ApplicationSession):
         except OSError:
             pass
 
-        threading.Thread(self.udp_thread, daemon=True).start()
+        threading.Thread(target=self.udp_thread, daemon=True).start()
 
         while True:
             try:
