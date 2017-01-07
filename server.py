@@ -231,6 +231,7 @@ class Component(ApplicationSession):
         if down:
             if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                 debug(badge.id, "Exit sequence pressed")
+                print("Badge ID {} (ip {}) exited".format(badge.id, self.badge_ips[badge.id]))
                 self.publish(u'me.magbadge.app.' + game + '.user.leave', badge.id)
                 self.game_map[badge.id] = None
             else:
