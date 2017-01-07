@@ -180,6 +180,11 @@ class Component(ApplicationSession):
                     badge.pings -= 1
             time.sleep(.05)
 
+    def save_thread(self):
+        while True:
+            time.sleep(30)
+            self.save()
+
     def noop(self, badge_id):
         self.send_packet(badge_id, b'\x00\x00')
 
@@ -334,6 +339,17 @@ class Component(ApplicationSession):
             if not self.game_map[badge]:
                 yield from self.set_lights(badge, *args)
 
+    def save(self):
+        print("DO NOT KILL, WRITING...")
+        with open('state.json', 'w') as f:
+            json.dump({
+                'badge_ips': self.badge_ips,
+                'join_codes': self.join_codes,
+                'game_map': self.game_map,
+                'konami_players': list(self.konami.players)
+            }, f)
+        print("DONE!")
+
     @asyncio.coroutine
     def morse_code(self, text):
         print("morsing")
@@ -387,6 +403,7 @@ class Component(ApplicationSession):
         our_ip = socket.gethostbyname_ex(socket.gethostname())[2]
 
         threading.Thread(target=self.ping_all_the_things, daemon=True).start()
+        threading.Thread(target=self.save_thread, daemon=True).start()
 
         self.socket = sock
         while True:
@@ -460,15 +477,7 @@ class Component(ApplicationSession):
                     except:
                         traceback.print_exc()
             except KeyboardInterrupt:
-                print("DO NOT KILL, WRITING...")
-                with open('state.json', 'w') as f:
-                    json.dump({
-                        'badge_ips': self.badge_ips,
-                        'join_codes': self.join_codes,
-                        'game_map': self.game_map,
-                        'konami_players': list(self.konami.players)
-                    }, f)
-                print("DONE!")
+                self.save()
                 break
             except:
                 traceback.print_exc()
