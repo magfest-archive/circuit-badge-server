@@ -27,7 +27,7 @@ class Player:
         self.lights = [(0xff, 0, 0), (0, 0xff, 0), (0, 0, 0xff), (0xff, 0xff, 0xff)]
 
     @asyncio.coroutine
-    def  cycle_lights(self):
+    def cycle_lights(self):
         self.lights = self.lights[1:] + self.lights[:1]
 
         yield from asyncio.gather(
@@ -50,8 +50,8 @@ class Player:
 
 
 class ExampleGame(ApplicationSession):
-    def __init__(self, component_config, *_, **__):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         #: Maps Badge# => Player
         self.badge_map = {}
 

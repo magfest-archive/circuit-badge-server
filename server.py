@@ -137,7 +137,6 @@ class Badge:
         self.pings = 0
 
 
-
 def format_mac(mac):
     return ':'.join(('%02X' % d for d in mac))
 
