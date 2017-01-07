@@ -170,6 +170,7 @@ class Component(ApplicationSession):
         self.game_map = {}
         self.default_color = (0,) * 12
         self.konami = Konami()
+        self._join_index = 0
 
     def ping_all_the_things(self):
         while True:
