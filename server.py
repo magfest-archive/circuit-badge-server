@@ -133,6 +133,8 @@ class Badge:
         self.game = None
         self.join_time = 0
         self.last_update = 0
+        self.pings = 100
+
 
 
 def format_mac(mac):
@@ -168,6 +170,17 @@ class Component(ApplicationSession):
         self.game_map = {}
         self.default_color = (0,) * 12
         self.konami = Konami()
+
+    def ping_all_the_things(self):
+        while True:
+            for badge_id, badge in list(self.badges.items()):
+                if badge.pings > 0:
+                    self.noop(badge_id)
+                    badge.pings -= 1
+            time.sleep(.05)
+
+    def noop(self, badge_id):
+        self.send_packet(badge_id, b'\x00\x00')
 
     def generate_joincode(self):
         res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
@@ -404,6 +417,7 @@ class Component(ApplicationSession):
                     if gpio_trigger:
                         button = BUTTON_NAMES[gpio_trigger]
                         if not gpio_direction:
+                            badge.pings = 200
                             badge.buttons.append(gpio_trigger)
 
                         if self.game_map[badge_id]:
