@@ -62,7 +62,9 @@ MODE_STATIC = 'static'
 MODE_UNIQUE = 'unique'
 MODE_SINGLE = 'single'
 
-DEBUG_BADGES = []
+DEBUG_BADGES = (
+    'A0:20:A6:07:18:96',
+)
 
 def debug(badge_id, *strs):
     if badge_id in DEBUG_BADGES:
