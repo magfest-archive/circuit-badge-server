@@ -66,10 +66,10 @@ MORSE_ON = (64,) * 12
 MORSE_OFF = (0,) * 12
 
 
-DEBUG_BADGES = [
-#    'A0:20:A6:07:18:96', # dylan
+DEBUG_BADGES = (
+    'A0:20:A6:07:18:96', # dylan
 #    'A0:20:A6:00:EE:18', # charles
-]
+)
 
 MORSE_CODE = {
     'A': '.-', 'B': '-...', 'C': '-.-.',
@@ -243,7 +243,6 @@ class Component(ApplicationSession):
             self.game_map[player] = None
 
     def send_button_updates(self, game, badge, button, down):
-        debug(badge.id, "sending button updates")
         if down:
             if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                 debug(badge.id, "Exit sequence pressed")
@@ -280,13 +279,9 @@ class Component(ApplicationSession):
         yield from self.set_lights(badge_id, *(self.konami.color * 4))
 
     def send_packet(self, badge_id, packet):
-        debug(badge_id, "packet", packet)
-        debug(badge_id, "game state", self.game_map[badge_id])
         if badge_id in self.badge_ips:
             ip = self.badge_ips[badge_id]
-            debug(badge_id, "sending...")
             self.socket.sendto(b'\x00\x00\x00\x00\x00\x00' + packet, (ip, 8001))
-            debug(badge_id, "sent the packet")
         else:
             print("LOL NOPE CAN'T DO THAT")
 
@@ -304,7 +299,7 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
-        debug(badge_id, "RAINBOW " + badge_id)
+        #debug(badge_id, "RAINBOW " + badge_id)
         executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
     @asyncio.coroutine
@@ -314,14 +309,14 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def set_lights_one(self, badge_id, r, g, b):
-        debug(badge_id, "Setting lights!")
+        #debug(badge_id, "Setting lights!")
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
         #executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0) + (g, r, b) * 4))
 
     @asyncio.coroutine
     def set_lights(self, badge_id, *colors):
         r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4 = colors
-        debug(badge_id, 'setting lights')
+        #debug(badge_id, 'setting lights')
         executor.submit(self.send_packet, badge_id, bytes((LED_CONTROL, 0, 0, 0, g1, r1, b1, g2, r2, b2, g3, r3, b3, g4, r4, b4)))
 
     def rssi(self, badge_id, min=30, max=45, intensity=96):
