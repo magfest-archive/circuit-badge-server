@@ -57,35 +57,29 @@ class ExampleGame(ApplicationSession):
 
     @asyncio.coroutine
     def  onJoin(self, details):
-        results = yield from self.register(self)
-        for res in results:
-            if isinstance(res, wamp.protocol.Registration):
-                continue
-            else:
-                print("Error registering!")
+        yield from self.register(self.joincode, u'me.magbadge.game.example.joincode.updated')
+        yield from self.register(self.player_join, u'me.magbadge.app.example.user.join')
+        yield from self.register(self.player_leave, u'me.magbadge.game.example.user.leave')
+        yield from self.register(self.button_down, u'me.magbadge.game.example.user.leave')
         self.publish(u'me.magbadge.joincode.request', 'example')
 
     def get_player(self, badge):
         return self.badge_map.get(badge, None)
     
-    @wamp.register(u'me.magbadge.game.example.joincode.updated')
     def joincode(self, code):
         # Turns [['select', 'start'], 'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a', 'start'] into "Select+Start, ^ ^ v v < > < > B A Start"
         print("Press {} to join!".format((" ".join((button.title() if isinstance(button, str) else ('+'.join((b.title() for b in button)) + ', ') for button in code)))))
 
-    @wamp.register(u'me.magbadge.app.example.user.join')
     def player_join(self, badge_id):
         self.badge_map[badge_id] = Player(badge_id)
         print("Badge #{} has entered the game!".format(badge_id))
 
-    @wamp.register(u'me.magbadge.game.example.user.leave')
     def player_leave(self, badge_id):
         player = self.get_player(badge_id)
         if player:
             print("Player {} has left the game!".format(player.name))
             del self.badge_map[badge_id]
 
-    @wamp.register(u'me.magbadge.game.example.game.button.down')
     def button_down(self, badge, button):
         player = self.get_player(badge)
         
