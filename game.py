@@ -62,11 +62,12 @@ class ExampleGame(ApplicationSession):
         yield from self.register(self.player_leave, u'me.magbadge.app.example.user.leave')
         yield from self.register(self.button_down, u'me.magbadge.app.example.user.button.down')
         res = yield from self.call(u'me.magbadge.joincode.request', 'example')
-        self.joincode(res)
+        yield from self.joincode(res)
 
     def get_player(self, badge):
         return self.badge_map.get(badge, None)
-    
+
+    @asyncio.coroutine
     def joincode(self, code):
         # Turns [['select', 'start'], 'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a', 'start'] into "Select+Start, ^ ^ v v < > < > B A Start"
         print("Press {} to join!".format((" ".join((button.title() if isinstance(button, str) else ('+'.join((b.title() for b in button)) + ', ') for button in code)))))
