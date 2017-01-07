@@ -153,7 +153,11 @@ class Konami:
     def __init__(self):
         self.players = set()
         self.colors = collections.deque(maxlen=4)
-        self.color = (0, 255, 255)
+
+        self.colors.append((255, 0, 0))
+        self.colors.append((255, 255, 0))
+        self.colors.append((0, 255, 0))
+        self.colors.append((0, 0, 255))
 
     def add_player(self, badge_id):
         self.players.add(badge_id)
