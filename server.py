@@ -67,6 +67,7 @@ MORSE_OFF = (0,) * 12
 
 DEBUG_BADGES = (
     'A0:20:A6:07:18:96', # dylan
+    'A0:20:A6:00:EE:18', # charles
 )
 
 MORSE_CODE = {
@@ -382,6 +383,9 @@ class Component(ApplicationSession):
                 badge_id = format_mac(data[0:6])
                 msg_type = data[6]
                 packet = data[7:]
+                status_count = int.from_bytes(packet[20:24], 'big'),  # status_count
+
+                debug(badge_id, "STATUS: ", status_count)
 
                 if badge_id not in self.badge_ips:
                     if not len(self.badge_ips) % 10:
