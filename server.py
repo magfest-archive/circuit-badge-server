@@ -119,7 +119,7 @@ class Badge:
             packet[10], # trigger_direction
             packet[11], # led_power
             int.from_bytes(packet[12:14], 'big'), # batt_voltage
-            int.from_bytes(packet[14:16], 'big'), # update_id
+            int.from_bytes(packet[14:16], 'big'),  # update_id
             int.from_bytes(packet[16:18], 'big'), # heap_free
             packet[18], # sleep_performance
             int.from_bytes(packet[20:24], 'big'), # status_count
@@ -383,7 +383,7 @@ class Component(ApplicationSession):
                 badge_id = format_mac(data[0:6])
                 msg_type = data[6]
                 packet = data[7:]
-                status_count = int.from_bytes(packet[20:24], 'big'),  # status_count
+                status_count = int.from_bytes(packet[14:16], 'big') # update_id
 
                 debug(badge_id, "STATUS: ", status_count)
 
