@@ -152,12 +152,12 @@ class Konami:
     }
     def __init__(self):
         self.players = set()
-        self.colors = collections.deque(maxlen=4)
+        self.colors = collections.deque(maxlen=12)
 
-        self.colors.append((255, 0, 0))
-        self.colors.append((255, 255, 0))
-        self.colors.append((0, 255, 0))
-        self.colors.append((0, 0, 255))
+        self.colors.extend((255, 0, 0))
+        self.colors.extend((255, 255, 0))
+        self.colors.extend((0, 255, 0))
+        self.colors.extend((0, 0, 255))
 
     def add_player(self, badge_id):
         self.players.add(badge_id)
@@ -274,7 +274,7 @@ class Component(ApplicationSession):
         elif button == 'select':
             pass
         else:
-            self.konami.colors.append(Konami.COLOR_MAP[button])
+            self.konami.colors.extend(Konami.COLOR_MAP[button])
             for badge_id in set(self.konami.players):
                 yield from self.set_lights(badge_id, *tuple(self.konami.colors))
 
