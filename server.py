@@ -60,39 +60,6 @@ JOIN_INDEX_MAX = 6**4 # 1296
 MODE_STATIC = 'static'
 MODE_UNIQUE = 'unique'
 MODE_SINGLE = 'single'
-
-MORSE_ON = (64,) * 12
-MORSE_OFF = (0,) * 12
-
-
-DEBUG_BADGES = (
-    'A0:20:A6:07:18:96', # dylan
-)
-
-MORSE_CODE = {
-    'A': '.-', 'B': '-...', 'C': '-.-.',
-    'D': '-..', 'E': '.', 'F': '..-.',
-    'G': '--.', 'H': '....', 'I': '..',
-    'J': '.---', 'K': '-.-', 'L': '.-..',
-    'M': '--', 'N': '-.', 'O': '---',
-    'P': '.--.', 'Q': '--.-', 'R': '.-.',
-    'S': '...', 'T': '-', 'U': '..-',
-    'V': '...-', 'W': '.--', 'X': '-..-',
-    'Y': '-.--', 'Z': '--..',
-
-    '0': '-----', '1': '.----', '2': '..---',
-    '3': '...--', '4': '....-', '5': '.....',
-    '6': '-....', '7': '--...', '8': '---..',
-    '9': '----.'
-}
-
-MORSE_ELEMENT = .092
-MORSE_DIT = MORSE_ELEMENT * 1
-MORSE_DAH = MORSE_ELEMENT * 3
-MORSE_CHAR = MORSE_ELEMENT * 1
-MORSE_SPACE = MORSE_ELEMENT * 7
-
-
 def debug(badge_id, *strs):
     if badge_id in DEBUG_BADGES:
         print(*strs)
@@ -167,6 +134,8 @@ class Component(ApplicationSession):
         self.game_map = {}
         self.default_color = (0,) * 12
         self.konami = Konami()
+        self.packet_queue = asyncio.Queue()
+        self.loop = None
 
     def generate_joincode(self):
         res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
@@ -341,36 +310,11 @@ class Component(ApplicationSession):
             if char != ' ':
                 yield from asyncio.sleep(MORSE_CHAR)
 
-    @asyncio.coroutine
-    def onJoin(self, details):
-        yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
-        yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
-        yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
-        yield from self.subscribe(self.set_lights_nogame, u'me.magbadge.idle.lights')
-        yield from self.subscribe(self.morse_code, u'me.magbadge.idle.morse_code')
-
-        try:
-            with open('state.json') as f:
-                res = json.load(f)
-                self.join_codes = res.get('join_codes', {})
-                self.badge_ips = res.get('badge_ips', {})
-                self.game_map = res.get('game_map', {})
-                self.konami.players = set(res.get('konami_players', []))
-
-            print("Pre-loaded {} players".format(len(self.badge_ips)))
-        except OSError:
-            pass
-
-        counter = 0
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    def udp_thread(self):
+        self.socket = sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8000))
 
-        next_scan = time.time() - 1
-        next_rssi = time.time() + 10000
-
         our_ip = socket.gethostbyname_ex(socket.gethostname())[2]
-
-        self.socket = sock
         while True:
             try:
                 data, (ip, port) = sock.recvfrom(1024)
@@ -389,6 +333,44 @@ class Component(ApplicationSession):
 
                 if badge_id not in self.badges:
                     self.badges[badge_id] = Badge(badge_id)
+
+                self.loop.call_soon_threadsafe(self.packet_queue.put_nowait, (badge_id, msg_type, packet))
+            except KeyboardInterrupt:
+                return
+            except:
+                continue
+
+
+    @asyncio.coroutine
+    def onJoin(self, details):
+        self.loop = asyncio.get_event_loop()
+        yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
+        yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
+        yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
+        yield from self.subscribe(self.set_lights_nogame, u'me.magbadge.idle.lights')
+        yield from self.subscribe(self.morse_code, u'me.magbadge.idle.morse_code')
+
+        try:
+            with open('state.json') as f:
+                res = json.load(f)
+                self.join_codes = res.get('join_codes', {})
+                self.badge_ips = res.get('badge_ips', {})
+                self.game_map = res.get('game_map', {})
+                self.konami.players = set(res.get('konami_players', []))
+
+            print("Pre-loaded {} players".format(len(self.badge_ips)))
+        except OSError:
+            pass
+
+        threading.Thread(self.udp_thread, daemon=True).start()
+
+        while True:
+            try:
+                data, (ip, port) = sock.recvfrom(1024)
+                if ip in our_ip:
+                    continue
+
+                badge_id, msg_type, packet = yield from self.packet_queue.get()
 
                 badge = self.badges[badge_id]
 
