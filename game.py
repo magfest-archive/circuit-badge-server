@@ -70,6 +70,7 @@ class ExampleGame(ApplicationSession):
     @asyncio.coroutine
     def joincode(self, code):
         # Turns [['select', 'start'], 'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a', 'start'] into "Select+Start, ^ ^ v v < > < > B A Start"
+        yield from asyncio.sleep(.00001)
         print("Press {} to join!".format((" ".join((button.title() if isinstance(button, str) else ('+'.join((b.title() for b in button)) + ', ') for button in code)))))
 
     def player_join(self, badge_id):
