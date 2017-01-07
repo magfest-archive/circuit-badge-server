@@ -152,6 +152,7 @@ class Konami:
     }
     def __init__(self):
         self.players = set()
+        self.colors = collections.deque(maxlen=4)
         self.color = (0, 255, 255)
 
     def add_player(self, badge_id):
@@ -221,15 +222,10 @@ class Component(ApplicationSession):
             entered = tuple(badge.buttons)[-TOTAL_JOIN:]
 
             if tuple(badge.buttons)[-len(KONAMI):] == KONAMI:
-                debug(badge.id, "KONAMI was entered")
                 self.game_map[badge.id] = "konami"
-                debug(badge.id, "added to game map")
                 yield from self.rainbow(badge.id)
-                debug(badge.id, "dane rainbowing")
-                debug(badge.id, "publishing konami join")
                 self.konami.players.add(badge.id)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
-                debug(badge.id, "done konami join")
             elif entered in self.join_codes:
                 debug(badge.id, "Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
@@ -274,9 +270,9 @@ class Component(ApplicationSession):
         elif button == 'select':
             pass
         else:
-            self.konami.color = Konami.COLOR_MAP[button]
+            self.konami.colors.append(Konami.COLOR_MAP[button])
             for badge_id in set(self.konami.players):
-                yield from self.set_lights(badge_id, *(self.konami.color * 4))
+                yield from self.set_lights(badge_id, *tuple(self.konami.colors))
 
     @asyncio.coroutine
     def konami_join(self, badge_id):
@@ -284,7 +280,7 @@ class Component(ApplicationSession):
         self.konami.add_player(badge_id)
         yield from self.rainbow(badge_id, 5000, 32, 128, 64)
         #yield from asyncio.sleep(2)
-        yield from self.set_lights(badge_id, *(self.konami.color * 4))
+        yield from self.set_lights(badge_id, *tuple(self.konami.colors))
 
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_ips:
