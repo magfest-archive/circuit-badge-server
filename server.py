@@ -324,6 +324,7 @@ class Component(ApplicationSession):
         while True:
             try:
                 data, (ip, port) = sock.recvfrom(1024)
+                print("THREAD got packet")
                 if ip in our_ip:
                     continue
 
@@ -374,6 +375,7 @@ class Component(ApplicationSession):
         while True:
             try:
                 badge_id, msg_type, packet = yield from self.packet_queue.get()
+                print("ASYNCIO got packet")
 
                 badge = self.badges[badge_id]
 
