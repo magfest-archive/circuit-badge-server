@@ -134,7 +134,7 @@ class Badge:
         self.game = None
         self.join_time = 0
         self.last_update = 0
-        self.pings = 100
+        self.pings = 0
 
 
 
