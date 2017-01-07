@@ -425,7 +425,7 @@ class Component(ApplicationSession):
 
         threading.Thread(target=self.ping_all_the_things, daemon=True).start()
         threading.Thread(target=self.save_thread, daemon=True).start()
-        threading.Thread(target=log_packet_thread(), daemon=True).start()
+        threading.Thread(target=log_packet_thread, daemon=True).start()
 
         self.socket = sock
         while True:
