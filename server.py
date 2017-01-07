@@ -192,7 +192,7 @@ class Component(ApplicationSession):
         res = convert_joincode((JOIN_INDEX_MAX-1)^self._join_index)
         self._join_index += 1
         print("Generated joincode", res)
-        return res
+        return tuple([BUTTON_NAMES[b] for b in (JOIN_PREFIX + res)])
 
     def expire_joincode(self, joincode):
         if joincode in self.join_codes:
