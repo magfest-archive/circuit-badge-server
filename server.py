@@ -236,7 +236,6 @@ class Component(ApplicationSession):
                 self.game_map[badge.id] = None
             else:
                 debug(badge.id, "[ " + game + " ] Button " + button + " pressed")
-                self.rainbow(badge_id)
                 self.publish(u'me.magbadge.app.' + game + '.user.button.down', badge.id, button, options=PublishOptions(exclude_me=False))
                 executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, 50, 128, 128, 0))
 
