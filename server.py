@@ -289,7 +289,7 @@ class Component(ApplicationSession):
             self.send_packet(badge_id, packet)
 
     @asyncio.coroutine
-    def rainbow(self, badge_id, runtime=1000, speed=128, intensity=32, offset=0):
+    def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
         debug(badge_id, "RAINBOW " + badge_id)
         executor.submit(self.send_packet, badge_id, struct.pack(">BBBBHBBB", LED_RAINBOW_MODES, 0, 0, 0, runtime, speed, intensity, offset))
 
@@ -412,7 +412,7 @@ class Component(ApplicationSession):
                             if not gpio_direction:
                                 yield from self.check_joincode(badge)
                             else:
-                                yield from self.rainbow(badge_id, 50, 32, 128, 0)
+                                yield from self.rainbow(badge_id, 200, 32, 32, 0)
 
                     elif not gpio_state and not self.game_map[badge_id]:
                         debug(badge_id, 'no gpio received and game map is', self.game_map[badge_id])
