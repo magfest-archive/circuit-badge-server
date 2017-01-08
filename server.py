@@ -459,7 +459,7 @@ class Component(ApplicationSession):
                     badge.voltage = int.from_bytes(packet[12:14], 'big'),  # batt_voltage
                     debug(badge_id, "Voltage is ", badge.voltage)
 
-                    if random.random() > .75:
+                    if random.random() > .95:
                         PACKET_LOG.put_nowait(struct.unpack(">6sBxb6sBBBBHHHBxI", data[:31]))
 
                     if gpio_trigger:
