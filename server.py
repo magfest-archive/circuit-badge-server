@@ -151,6 +151,7 @@ def log_packet_thread():
         with open("packets.log", "a") as logfile:
             while True:
                 logfile.writelines((",".join((str(f) for f in PACKET_LOG.get())) + '\n' for _ in range(1024)))
+                time.sleep(.1)
     except InterruptedError:
         print("Interrupted, stopping logger")
         return
