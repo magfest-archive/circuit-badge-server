@@ -50,7 +50,7 @@ DEEP_SLEEP = 9
 SCAN_INTERVAL = 600
 WIFI_INTERVAL = 10000
 
-EXIT_SEQUENCE = (BUTTON_START,) * 2
+EXIT_SEQUENCE = (BUTTON_START,) * 3
 JOIN_PREFIX = (BUTTON_START, BUTTON_SELECT)
 # Not including prefix
 JOIN_LENGTH = 4
@@ -137,9 +137,6 @@ class Badge:
         self.last_update = 0
         self.pings = 0
         self.voltage = 0
-
-    def battery_percent(self):
-        return (self.voltage - 2200)/(3000-2200)
 
 
 def format_mac(mac):
@@ -253,8 +250,6 @@ class Component(ApplicationSession):
                 yield from self.rainbow(badge.id)
                 self.konami.players.add(badge.id)
                 self.publish(u'me.magbadge.app.konami.user.join', badge.id)
-            elif badge.buttons[-1] == BUTTON_START:
-                self.game_map[badge.id] = "battery"
             elif entered in self.join_codes:
                 debug(badge.id, "Joincode entered!")
                 game_id, mode, mnemonic, timeout = self.join_codes[entered]
@@ -277,9 +272,9 @@ class Component(ApplicationSession):
 
     def send_button_updates(self, game, badge, button, down):
         if down:
-            if len(badge.buttons) and tuple(badge.buttons)[-len(EXIT_SEQUENCE):] == EXIT_SEQUENCE:
+            if len(badge.buttons) and tuple(badge.buttons)[-3:] == EXIT_SEQUENCE:
                 debug(badge.id, "Exit sequence pressed")
-                self.publish(u'me.magbadge.app.' + game + '.user.leave', badge.id, options=PublishOptions(exclude_me=False))
+                self.publish(u'me.magbadge.app.' + game + '.user.leave', badge.id)
                 self.game_map[badge.id] = None
             else:
                 debug(badge.id, "[ " + game + " ] Button " + button + " pressed")
@@ -314,10 +309,6 @@ class Component(ApplicationSession):
         #yield from asyncio.sleep(2)
         yield from self.set_lights(badge_id, *tuple(self.konami.colors))
 
-    @asyncio.coroutine
-    def battery_join(self, badge_id):
-        yield from self.show_voltage(badge_id)
-
     def send_packet(self, badge_id, packet):
         if badge_id in self.badge_ips:
             ip = self.badge_ips[badge_id]
@@ -336,25 +327,6 @@ class Component(ApplicationSession):
     def send_packet_all(self, packet):
         for badge_id in set(self.badge_ips.keys()):
             self.send_packet(badge_id, packet)
-
-    @asyncio.coroutine
-    def show_voltage(self, badge_id):
-        pct = self.badges[badge_id].battery_percent()
-
-        colors = [0] * 12
-        index = min(max(int(pct * 9), 0), 8)
-
-        if index == 0:
-            colors = [255, 0, 0] * 4
-        else:
-            for i in range(index // 2):
-                colors[i * 3] = 255
-                colors[i * 3 + 1] = 255
-                colors[i * 3 + 2] = 255
-            if index % 2:
-                colors[(index // 2) * 3] = 128
-
-        yield from self.set_lights(badge_id, *colors)
 
     @asyncio.coroutine
     def rainbow(self, badge_id, runtime=1000, speed=128, intensity=128, offset=0):
@@ -428,7 +400,6 @@ class Component(ApplicationSession):
         yield from self.subscribe(self.set_lights_one, u'me.magbadge.badge.lights')
         yield from self.subscribe(self.konami_button, u'me.magbadge.app.konami.user.button.down')
         yield from self.subscribe(self.konami_join, u'me.magbadge.app.konami.user.join')
-        yield from self.subscribe(self.battery_join, u'me.magbadge.app.battery.user.join')
         yield from self.subscribe(self.set_lights_nogame, u'me.magbadge.idle.lights')
         yield from self.subscribe(self.morse_code, u'me.magbadge.idle.morse_code')
         yield from self.register(self.request_joincode, u'me.magbadge.joincode.request')
@@ -484,7 +455,7 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
-                    badge.voltage = .2 * badge.voltage + .8 * int.from_bytes(packet[12:14], 'big'),  # batt_voltage
+                    badge.voltage = int.from_bytes(packet[12:14], 'big'),  # batt_voltage
                     debug(badge_id, "Voltage is ", badge.voltage)
 
                     PACKET_LOG.put_nowait(struct.unpack(">6sBxb6sBBBBHHHBxI", data[:31]))
