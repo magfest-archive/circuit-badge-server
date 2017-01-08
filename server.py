@@ -149,10 +149,11 @@ def log_packet_thread():
     try:
         with open("packets.log", "a") as logfile:
             while True:
-                pkt = PACKET_LOG.get()
-                logfile.write(",".join((str(f) for f in pkt)) + '\n')
+                logfile.writelines((",".join((str(f) for f in PACKET_LOG.get())) + '\n' for _ in range(1024)))
     except InterruptedError:
         print("Interrupted, stopping logger")
+        return
+    except KeyboardInterrupt:
         return
     except:
         traceback.print_exc()
