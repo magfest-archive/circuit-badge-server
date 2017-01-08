@@ -136,6 +136,7 @@ class Badge:
         self.join_time = 0
         self.last_update = 0
         self.pings = 0
+        self.voltage = 0
 
 
 def format_mac(mac):
@@ -454,6 +455,9 @@ class Component(ApplicationSession):
 
                 if msg_type == STATUS_UPDATE:
                     gpio_state, gpio_trigger, gpio_direction = packet[8], packet[9], packet[10]
+                    badge.voltage = int.from_bytes(packet[12:14], 'big'),  # batt_voltage
+                    debug(badge_id, "Voltage is ", badge.voltage)
+
                     PACKET_LOG.put_nowait(struct.unpack(">6sBxb6sBBBBHHHBxI", data[:31]))
 
                     if gpio_trigger:
