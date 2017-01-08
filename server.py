@@ -469,10 +469,10 @@ class Component(ApplicationSession):
                         if self.game_map[badge_id]:
                             self.send_button_updates(self.game_map[badge_id], badge, button, gpio_direction)
                         else:
-                            if not gpio_direction:
+                            if gpio_direction:
                                 yield from self.check_joincode(badge)
-                            else:
                                 yield from self.rainbow(badge_id, 100, 32, 32, 0)
+
 
                     elif not gpio_state and not self.game_map[badge_id]:
                         debug(badge_id, 'no gpio received and game map is', self.game_map[badge_id])
