@@ -69,7 +69,7 @@ MORSE_OFF = (0,) * 12
 
 DEBUG_BADGES = (
     'A0:20:A6:07:18:96', # dylan
-#    'A0:20:A6:00:EE:18', # charles
+    'A0:20:A6:00:EE:18', # charles
 )
 
 MORSE_CODE = {
